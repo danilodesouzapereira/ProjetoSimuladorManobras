@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DadosGrafo>
+	<Arestas>
+		<Aresta>
+			<Id>0</Id>
+			<CodigoChave>dj1</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>1</Id>
+			<CodigoChave>cf1</CodigoChave>
+		</Aresta>		
+		<Aresta>
+			<Id>2</Id>
+			<CodigoChave>cf2</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>3</Id>
+			<CodigoChave>cf3</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>4</Id>
+			<CodigoChave>cf4</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>5</Id>
+			<CodigoChave>cf5</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>6</Id>
+			<CodigoChave>cf6</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>7</Id>
+			<CodigoChave>cf7</CodigoChave>
+		</Aresta>
+		<Aresta>
+			<Id>8</Id>
+			<CodigoChave>cf8</CodigoChave>
+		</Aresta>
+	</Arestas>
+</DadosGrafo>

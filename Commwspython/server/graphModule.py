@@ -1,0 +1,227 @@
+# Python program for Kruskal's algorithm to find 
+# Minimum Spanning Tree of a given connected, 
+# undirected and weighted graph 
+
+from collections import defaultdict
+import random 
+import networkx as nx
+import matplotlib.pyplot as plt
+
+
+#Class to represent a graph 
+class Graph: 
+	def __init__(self,vertices): 
+		self.V = vertices #No. of vertices 
+		self.graph = [] # default dictionary to store graph 	
+		self.edgesKRST = [] # stores edges after KruskalRST procedure
+
+	''' Function to add an edge to graph '''
+	def addEdge(self,u,v,w): 
+		self.graph.append([u,v,w]) 
+
+		
+	''' Utility function to find set of an element i (uses path compression technique) '''
+	def find(self, parent, i): 
+		if parent[i] == i: 
+			return i 
+		return self.find(parent, parent[i]) 
+
+		
+	''' Function to plot graph '''
+	def plot_graph(self):
+		g = nx.Graph()
+		nodes_list = set([])
+		for edge in self.edgesKRST:
+			nodes_list.add(edge[0])
+			nodes_list.add(edge[1])
+		g.add_nodes_from(nodes_list)
+		
+		for edge in self.edgesKRST:
+			g.add_edge(edge[0], edge[1])
+
+		nx.draw(g, with_labels=True)
+		plt.draw()
+		plt.show()
+	
+		
+	''' Function that does union of two sets of x and y (uses union by rank) '''
+	def union(self, parent, rank, x, y): 
+		xroot = self.find(parent, x) 
+		yroot = self.find(parent, y) 
+
+		# Attach smaller rank tree under root of 
+		# high rank tree (Union by Rank) 
+		if rank[xroot] < rank[yroot]: 
+			parent[xroot] = yroot 
+		elif rank[xroot] > rank[yroot]: 
+			parent[yroot] = xroot 
+
+		# If ranks are same, then make one as root 
+		# and increment its rank by one 
+		else : 
+			parent[yroot] = xroot 
+			rank[xroot] += 1
+
+			
+	''' The main function to construct MST using Kruskal's algorithm '''
+	def KruskalMST(self): 
+
+		result =[] #This will store the resultant MST 
+
+		i = 0 # An index variable, used for sorted edges 
+		e = 0 # An index variable, used for result[] 
+
+			# Step 1: Sort all the edges in non-decreasing 
+				# order of their 
+				# weight. If we are not allowed to change the 
+				# given graph, we can create a copy of graph 
+		self.graph = sorted(self.graph,key=lambda item: item[2]) 
+
+		parent = [] ; rank = [] 
+
+		# Create V subsets with single elements 
+		for node in range(self.V): 
+			parent.append(node) 
+			rank.append(0) 
+	
+		# Number of edges to be taken is equal to V-1 
+		while e < self.V -1 : 
+
+			# Step 2: Pick the smallest edge and increment 
+					# the index for next iteration 
+			u,v,w = self.graph[i] 
+			i = i + 1
+			x = self.find(parent, u) 
+			y = self.find(parent ,v) 
+
+			# If including this edge does't cause cycle, 
+						# include it in result and increment the index 
+						# of result for next edge 
+			if x != y: 
+				e = e + 1	
+				result.append([u,v,w]) 
+				self.union(parent, rank, x, y)			 
+			# Else discard the edge 
+
+		# print the contents of result[] to display the built MST 
+		#print("Following are the edges in the constructed MST")
+		#for u,v,weight in result: 
+			#print str(u) + " -- " + str(v) + " == " + str(weight) 
+			#print ("%d -- %d == %d" % (u,v,weight)) 
+			
+	# Crossover operator. It takes two parent individuals and generates
+	# offspring which contains characteristics from both parents.
+	#def crossover(self, parent_edges_1, parent_edges_2):
+	#	if parent_edges_1 == None or parent_edges_2 == None:
+	#		return None
+	#	
+	#	# Gathers edges from both parents
+	#	union_edges = list(set(parent_edges_1) | set(parent_edges_2))
+		
+		
+		
+			
+	'''		
+	Mutation operator. It deletes a random edge and inserts a new one.
+	To guarantee radiality, it verifies if newly added edge creates mesh.
+	'''
+	def mutation(self):
+		if len(self.edgesKRST) == 0:
+			return
+			
+		# determines edge to be removed
+		i_remove = random.randint(0, len(self.edgesKRST)-1)
+		removed_edge = self.edgesKRST[i_remove]
+		self.edgesKRST.remove(removed_edge)
+		
+		# adds edge at random, provided that it does not create mesh
+		new_edge = self.pick_radial_edge(removed_edge)
+		if new_edge != None:	
+			self.edgesKRST.append(new_edge)
+		else:
+			self.edgesKRST.append(removed_edge)
+	
+
+	def pick_radial_edge(self, removed_edge):
+		parent = [] ; rank = []
+		for node in range(self.V): 
+			parent.append(node) 
+			rank.append(0) 
+		for edge in self.edgesKRST:
+			u = edge[0]; v = edge[1]
+			x = self.find(parent, u); y = self.find(parent, v)
+			self.union(parent, rank, x, y)	
+			
+		# gets all candidate edges
+		candidate_edges = []
+		for edge in self.graph:
+			if edge in self.edgesKRST or edge == removed_edge:
+				continue
+			candidate_edges.append(edge)
+			
+		#print("total candidates: %d" % (len(candidate_edges)))
+		#for edge in candidate_edges:
+		#	print("candidate: %d -- %d" % (edge[0], edge[1]))
+		
+		# Picks an edge at random. If it does not create cycle, returns the edge.
+		random_index = -1
+		for i in range(len(candidate_edges)):
+			random_index = random.randint(0, len(candidate_edges)-1)
+			edge = candidate_edges[random_index]
+			u = edge[0] ; v = edge[1]
+			x = self.find(parent, u); y = self.find(parent, v)
+			if x != y:
+				return edge
+		return None
+
+		
+	''' Function to print graph '''
+	def print_graph(self):
+		# print the contents of result[] to display the built MST 
+		for edge in self.edgesKRST: 
+			print ("%d -- %d" % (edge[0],edge[1])) 
+				
+				
+	''' The main function to construct RST using Kruskal's algorithm '''
+	def KruskalRST(self): 
+
+		result = [] # This will store the resultant RST 
+		i = 0       # An index variable, used for sorted edges 
+		e = 0       # An index variable, used for result[] 
+
+		# Step 1: Sort all the edges in non-decreasing 
+		# order of their 
+		# weight. If we are not allowed to change the 
+		# given graph, we can create a copy of graph 
+		#self.graph = sorted(self.graph,key=lambda item: item[2]) 
+		
+		
+		# randomly rearrange the graph
+		random.shuffle(self.graph)			
+
+		parent = [] ; rank = [] 
+
+		# Create V subsets with single elements 
+		for node in range(self.V): 
+			parent.append(node) 
+			rank.append(0) 		
+			
+		# Number of edges to be taken is equal to V-1 
+		while e < self.V -1 : 
+
+			# Step 2: Pick the smallest edge and increment 
+			# the index for next iteration 
+			u,v,w = self.graph[i] 
+			i = i + 1
+			x = self.find(parent, u) 
+			y = self.find(parent ,v) 
+
+			# If including this edge does't cause cycle, 
+						# include it in result and increment the index 
+						# of result for next edge 
+			if x != y: 
+				e = e + 1	
+				result.append([u,v,w]) 
+				self.union(parent, rank, x, y)			 
+				self.edgesKRST.append([u,v,w]) # saves spanning tree generated randomly
+			# Else discard the edge 
