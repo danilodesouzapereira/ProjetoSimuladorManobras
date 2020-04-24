@@ -62,7 +62,7 @@ class SM(object):
 		local_saida = self.dados_simulacao['local_saida'] + "\\ArquivoSaida.txt"
 		f = open(local_saida, "w+")
 		f.write('Este e o arquivo de saida do processo\n')
-		f.write('Local do defeito: ' + str(self.dados_simulacao['local_falta']) + '\n')
+		f.write('Local do defeito: ' + str(self.dados_simulacao['vertice_falta']) + '\n')
 		f.write('Numero de vertices: ' + str(self.dados_simulacao['num_vertices']) + '\n')
 		arestas = self.dados_simulacao['arestas']
 		f.write('\nDados das arestas:\n')
@@ -109,12 +109,14 @@ class SM(object):
 		#              DEFINIÇÕES E CONFIGURAÇÕES
 		#     (Podem ser lidas de arquivo de configurações)
 
-		num_geracoes, num_individuos, pc, pm = 2, 10, 0.9, 0.1
-		num_vertices = self.dados_simulacao['num_vertices'] 		
-		arestas = []
+		num_geracoes, num_individuos, pc, pm = 3, 5, 0.9, 0.1
+		num_vertices = self.dados_simulacao['num_vertices'] 	
+		arestas = [] ; arestas_iniciais = []
 		for aresta_json in self.dados_simulacao['arestas']:
 			arestas.append([aresta_json['u'], aresta_json['v'], aresta_json['w']])
-		descricao_grafo = {'num_vertices' : num_vertices, 'arestas' : arestas}
+		for aresta_inicial in self.dados_simulacao['arestas_iniciais']:
+			arestas_iniciais.append([aresta_inicial['u'], aresta_inicial['v'], aresta_inicial['w']])
+		descricao_grafo = {'num_vertices' : num_vertices, 'arestas' : arestas, 'arestas_iniciais' : arestas_iniciais}
 		descricao_ag = {'num_geracoes' : num_geracoes, 'num_individuos' : num_individuos, 'pc' : pc, 'pm' : pm}
 		#                                                        #
 		#________________________________________________________#

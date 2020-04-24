@@ -1,10 +1,12 @@
 import graphModule
 import itertools
+import sequentialSwitchingGAModule
 
 
 ''' Classe para representar um indivíduo de AG '''
 class Indiv:
-	def __init__(self, graph):
+	def __init__(self, graph, lista_arestas_iniciais):
+		self.lista_arestas_iniciais = lista_arestas_iniciais
 		self.graph = graph
 		self.f_evaluation = 100.0
 
@@ -19,6 +21,7 @@ class GraphGA:
 		self.pm = descricao_ag.get('pm')
 		self.num_vertices = descricao_grafo.get('num_vertices')
 		self.lista_arestas = descricao_grafo.get('arestas')
+		self.lista_arestas_iniciais = descricao_grafo.get('arestas_iniciais')
 		
 		# Grafo inicial
 		self.graph_initial = graphModule.Graph(self.num_vertices)	
@@ -26,9 +29,19 @@ class GraphGA:
 			self.graph_initial.addEdge(edge[0], edge[1], edge[2])
 		self.graph_initial.KruskalRST() 
 		
-		# Lista de indivíduos de AG (cada indivíduo contem um grafo e sua avaliação)
+		# Lista de indivíduos de AG (cada indivíduo contém: grafo inicial, 
+		# grafo final e sua avaliação)
 		self.list_ga_indiv = []
 		
+	
+	''' Determina as arestas conectadas a um determinado vértice '''
+	def edges_to_vertice(self, vertice_falta):
+		arestas_remover = []
+		for edge in self.lista_arestas:
+			if edge[0] == vertice_falta or edge[1] == vertice_falta:
+				arestas_remover.append({edge[0], edge[1]})
+		return arestas_remover
+	
 		
 	''' Método principal, que efetivamente executa o AG '''
 	def run_gga(self):
@@ -49,9 +62,9 @@ class GraphGA:
 			
 			
 		# debug
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			graph.plot_graph()
+		# for indiv in self.list_ga_indiv:
+			# graph = indiv.graph
+			# graph.plot_graph()
 			
 		
 	''' 
@@ -61,6 +74,12 @@ class GraphGA:
 	'''
 	def run_gga_optimal_switching(self):
 		print("\nOptimal switching algorithm")
+		
+		# runs Seq Switching GA for each individual
+		for indiv in self.list_ga_indiv:
+			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph, indiv.lista_arestas_iniciais)	
+			ssga.run_ssga()
+		
 		# Insere avaliação para cada indivíduo de AG
 		for indiv in self.list_ga_indiv:
 			graph = indiv.graph
@@ -84,11 +103,11 @@ class GraphGA:
 					indiv.f_evaluation = indiv.f_evaluation - 1.
 					
 		# debug
-		linha = ""
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			linha = linha + " " + str(indiv.f_evaluation)
-		print("Avaliacoes dos individuos: " + linha)
+		# linha = ""
+		# for indiv in self.list_ga_indiv:
+			# graph = indiv.graph
+			# linha = linha + " " + str(indiv.f_evaluation)
+		# print("Avaliacoes dos individuos: " + linha)
 					
 	
 	''' Função auxiliar para retornar a função de avaliação de um indivíduo'''	
@@ -137,7 +156,7 @@ class GraphGA:
 			for edge in self.lista_arestas:               # insere arestas
 				graph.addEdge(edge[0], edge[1], edge[2])
 			graph.KruskalRST()                            # gera grafo radial				
-			indiv = Indiv(graph)			
+			indiv = Indiv(graph, self.lista_arestas_iniciais)			
 			self.list_ga_indiv.append(indiv)              # guarda indivíduo em lista
 			
 		# debug
@@ -150,7 +169,7 @@ class GraphGA:
 			
 	''' Operador MUTAÇÃO '''
 	def graph_mutation(self):
-		print("\Mutation: ")
+		print("\nMutation: ")
 		for indiv in self.list_ga_indiv:
 			graph = indiv.graph
 			#print("Graph before mutation: ") ; graph.print_graph()
@@ -200,7 +219,7 @@ class GraphGA:
 			#print ("Final graph:") ; new_graph.print_graph()
 			
 			# Appends new graph individual into list of individuals
-			indiv = Indiv(new_graph)
+			indiv = Indiv(new_graph, self.lista_arestas_iniciais)
 			self.list_ga_indiv.append(indiv)
 			
 		# debug
