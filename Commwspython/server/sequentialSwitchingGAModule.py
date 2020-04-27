@@ -10,6 +10,8 @@ class IndivSS:
 		# self.final_graph = final_graph
 		# self.SSGA_settings = SSGA_settings
 		# self.switching_chromosome = []
+		pass
+
 
 
 ''' 
