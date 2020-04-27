@@ -6,11 +6,11 @@ Class to represent optimal switching Genetic Algorithm Individuals
 '''
 class IndivSS:
 	def __init__(self, SSGA_settings):
-		self.base_graph = base_graph
-		self.final_graph = final_graph
-		self.SSGA_settings = SSGA_settings
-		self.switching_chromosome = []
-		
+		# self.base_graph = base_graph
+		# self.final_graph = final_graph
+		# self.SSGA_settings = SSGA_settings
+		# self.switching_chromosome = []
+
 
 ''' 
 Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
