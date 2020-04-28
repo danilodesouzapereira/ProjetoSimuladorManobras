@@ -140,8 +140,72 @@ class Graph:
 			self.edgesKRST.append(new_edge)
 		else:
 			self.edgesKRST.append(removed_edge)
-	
 
+	'''
+	Method to determine if current graph topology is radial
+	'''
+	def is_radial(self):
+		parent = [] ; rank = []
+		for node in range(self.V): parent.append(node) ; rank.append(0)
+		for edge in self.edgesKRST:
+			x = self.find(parent, edge[0]) ; y = self.find(parent, edge[1])
+			self.union(parent, rank, x, y)
+			if x == y: return False
+		return True
+
+
+	'''
+	Method to determine if closing edge causes mesh
+	'''
+	def creates_mesh(self, candidate_edge):
+		parent = [] ; rank = []
+		for node in range(self.V):
+			parent.append(node) ; rank.append(0)
+		for edge in self.edgesKRST:
+			x = self.find(parent, edge[0]) ; y = self.find(parent, edge[1])
+			self.union(parent, rank, x, y)
+
+		# tries to insert candidate edge
+		x = self.find(parent, candidate_edge[0]); y = self.find(parent, candidate_edge[1])
+		# returns if candidate edge creates mesh
+		return x == y
+
+
+	'''
+	Method to pick a switch/edge to open in order to restore
+	graph radiality
+	'''
+	def edge_to_open_mesh(self, list_switches_to_open):
+		# verifications
+		if list_switches_to_open is None: return None
+		if len(list_switches_to_open) == 0: return None
+
+
+		str_conn_edges = ""
+		for edge in self.edgesKRST:
+			str_conn_edges += str(edge) + " "
+		str_sw_to_open = ""
+		for edge in list_switches_to_open:
+			str_sw_to_open += str(edge) + " "
+		print("connected edges: " + str_conn_edges + " switches to open: " + str_sw_to_open)
+
+		# Among the edges that need to be opened, picks an edge
+		# to be opened in order to restore radiality
+		for edge in list_switches_to_open:
+			edge_list = list(edge) ; edge_to_be_opened = [edge_list[0], edge_list[1], 1]
+
+			# tries to remove edge_to_be_opened from graph
+			self.edgesKRST.remove(edge_to_be_opened)
+
+			# if resulting graph is radial, returns.
+			if self.is_radial(): return edge
+			else: self.edgesKRST.append(edge_to_be_opened)
+		return None
+
+
+	'''
+	Method to pick edge that does not cause mesh
+	'''
 	def pick_radial_edge(self, removed_edge):
 		parent = [] ; rank = []
 		for node in range(self.V): 

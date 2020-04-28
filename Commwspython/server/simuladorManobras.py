@@ -118,11 +118,12 @@ class SM(object):
 			arestas_iniciais.append([aresta_inicial['u'], aresta_inicial['v'], aresta_inicial['w']])
 		descricao_grafo = {'num_vertices' : num_vertices, 'arestas' : arestas, 'arestas_iniciais' : arestas_iniciais}
 		descricao_ag = {'num_geracoes' : num_geracoes, 'num_individuos' : num_individuos, 'pc' : pc, 'pm' : pm}
+		descricao_ag_chaveamento = {'num_geracoes': 5, 'num_individuos': 10, 'pc': 0.9, 'pm': 0.1, 'min_porc_fitness':5.0}
 		#                                                        #
 		#________________________________________________________#
 		
 		# Inicia objeto de AG
-		gga = graphGAModule.GraphGA(descricao_grafo, descricao_ag)
+		gga = graphGAModule.GraphGA(descricao_grafo, descricao_ag, descricao_ag_chaveamento)
 		
 		# Executa o AG
 		gga.run_gga()

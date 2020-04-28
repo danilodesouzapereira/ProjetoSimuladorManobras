@@ -13,7 +13,7 @@ class Indiv:
 
 ''' Classe para representar AG aplicado a grafos '''
 class GraphGA: 
-	def __init__(self, descricao_grafo, descricao_ag): 
+	def __init__(self, descricao_grafo, descricao_ag, descricao_ag_chaveamento):
 		# Parâmetros do AG
 		self.num_geracoes = descricao_ag.get('num_geracoes')
 		self.num_individuals = descricao_ag.get('num_individuos')
@@ -22,6 +22,7 @@ class GraphGA:
 		self.num_vertices = descricao_grafo.get('num_vertices')
 		self.lista_arestas = descricao_grafo.get('arestas')
 		self.lista_arestas_iniciais = descricao_grafo.get('arestas_iniciais')
+		self.descricao_ag_chaveamento = descricao_ag_chaveamento
 		
 		# Grafo inicial
 		self.graph_initial = graphModule.Graph(self.num_vertices)	
@@ -77,9 +78,11 @@ class GraphGA:
 		
 		# runs Seq Switching GA for each individual
 		for indiv in self.list_ga_indiv:
-			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph, indiv.lista_arestas_iniciais)	
+			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
+																 indiv.lista_arestas_iniciais,
+																 self.descricao_ag_chaveamento)
 			ssga.run_ssga()
-		
+
 		# Insere avaliação para cada indivíduo de AG
 		for indiv in self.list_ga_indiv:
 			graph = indiv.graph
