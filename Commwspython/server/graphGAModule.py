@@ -3,65 +3,51 @@ import itertools
 import sequentialSwitchingGAModule
 
 
-''' Classe para representar um indivíduo de AG '''
+'''  
+Class to represent Graph GA individual
+'''
 class Indiv:
-	def __init__(self, graph, lista_arestas_iniciais):
-		self.lista_arestas_iniciais = lista_arestas_iniciais
+	def __init__(self, graph, initial_edges):
+		self.initial_edges = initial_edges
 		self.graph = graph
 		self.f_evaluation = 100.0
 
+#===================================================================================#
 
-''' Classe para representar AG aplicado a grafos '''
+'''
+Class to represent GA applied to graphs 
+'''
 class GraphGA: 
-	def __init__(self, descricao_grafo, descricao_ag, descricao_ag_chaveamento):
+	def __init__(self, graph_descr, settings_graph_ga, settings_switching_ga):
 		# Parâmetros do AG
-		self.num_geracoes = descricao_ag.get('num_geracoes')
-		self.num_individuals = descricao_ag.get('num_individuos')
-		self.pc = descricao_ag.get('pc')
-		self.pm = descricao_ag.get('pm')
-		self.num_vertices = descricao_grafo.get('num_vertices')
-		self.lista_arestas = descricao_grafo.get('arestas')
-		self.lista_arestas_iniciais = descricao_grafo.get('arestas_iniciais')
-		self.descricao_ag_chaveamento = descricao_ag_chaveamento
-		
-		# Grafo inicial
-		self.graph_initial = graphModule.Graph(self.num_vertices)	
-		for edge in self.lista_arestas:
-			self.graph_initial.addEdge(edge[0], edge[1], edge[2])
-		self.graph_initial.KruskalRST() 
-		
-		# Lista de indivíduos de AG (cada indivíduo contém: grafo inicial, 
-		# grafo final e sua avaliação)
+		self.num_geracoes = settings_graph_ga.get('num_generations')
+		self.num_individuals = settings_graph_ga.get('num_individuals')
+		self.pc = settings_graph_ga.get('pc')
+		self.pm = settings_graph_ga.get('pm')
+		self.lista_arestas = graph_descr.get('edges')
+		self.initial_edges = graph_descr.get('initial_edges')
+		self.settings_switching_ga = settings_switching_ga
+
+		# List of GA individuals. Each individuals contains:
+		# Initial graph, final graph, fitness value
 		self.list_ga_indiv = []
+
 		
-	
-	''' Determina as arestas conectadas a um determinado vértice '''
-	def edges_to_vertice(self, vertice_falta):
-		arestas_remover = []
-		for edge in self.lista_arestas:
-			if edge[0] == vertice_falta or edge[1] == vertice_falta:
-				arestas_remover.append({edge[0], edge[1]})
-		return arestas_remover
-	
-		
-	''' Método principal, que efetivamente executa o AG '''
+	''' 
+	Main method, which effectively runs GA
+	'''
 	def run_gga(self):
-		print("\n\n\n==========Execucao efetiva do AG============")
-		print("\n\n-------Geracao de individuos iniciais-------")
-		
-		# Indivíduos iniciais do AG do 1o estágio
+		print(" ============== 1st stage - Initial generation ===============")
 		self.generate_individuals()
-		self.run_gga_optimal_switching() # executa o AG do 2o estágio
+		self.run_gga_optimal_switching()
 		
-		# Executa gerações do AG do 1o estágio:
-		for i in range(self.num_geracoes):						
-			self.graph_mutation() # executa operação de mutação			
-			self.graph_crossover() # executa operação de cruzamento		
-			self.run_gga_optimal_switching() # executa o AG do 2o estágio
-			self.graph_selection() # executa seleção dos melhores indivíduos
-			print("\n\n-------Nova geracao-------")
-			
-			
+		# 1st stage GA generations
+		for i in range(self.num_geracoes):
+			print("=== GGA generation #" + str(i+1) + " ===")
+			self.graph_mutation()
+			self.graph_crossover()
+			self.run_gga_optimal_switching()
+			self.graph_selection()
 		# debug
 		# for indiv in self.list_ga_indiv:
 			# graph = indiv.graph
@@ -69,42 +55,37 @@ class GraphGA:
 			
 		
 	''' 
-		Executa o AG do 2o estágio, que consiste em:
-		DETERMINAR O CHAVEAMENTO ÓTIMO PARA 
-        CADA ALTERNATIVA FINAL DE CONFIGURAÇÃO	
+   Runs GA 2nd stage, which consists of determining an
+   optimal switching sequence for a given alternative
 	'''
 	def run_gga_optimal_switching(self):
-		print("\nOptimal switching algorithm")
+		print("\n================ 2nd stage - SSGA =======================")
 		
-		# runs Seq Switching GA for each individual
-		for indiv in self.list_ga_indiv:
+		# runs Seq. Switching GA for each individual
+		for i in range(len(self.list_ga_indiv)):
+			print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")
+			indiv = self.list_ga_indiv[i]
+			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
 			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
-																 indiv.lista_arestas_iniciais,
-																 self.descricao_ag_chaveamento)
+																 indiv.initial_edges,
+																 self.settings_switching_ga)
 			ssga.run_ssga()
 
-		# Insere avaliação para cada indivíduo de AG
+		# Debug: inserts individuals' GA assessment (fitness)
 		for indiv in self.list_ga_indiv:
 			graph = indiv.graph
 			for edge in graph.edgesKRST:
-				u = edge[0] ; v = edge[1]
-				if (u == 2 and v == 5) or (u == 5 and v == 2):
-					indiv.f_evaluation = indiv.f_evaluation - 20.	
-				if (u == 2 and v == 7) or (u == 7 and v == 2):
-					indiv.f_evaluation = indiv.f_evaluation - 20.					
-				if (u == 3 and v == 5) or (u == 5 and v == 3):
-					indiv.f_evaluation = indiv.f_evaluation - 8.
-				if (u == 3 and v == 7) or (u == 7 and v == 3):
-					indiv.f_evaluation = indiv.f_evaluation - 8.
-				if (u == 6 and v == 7) or (u == 7 and v == 6):
-					indiv.f_evaluation = indiv.f_evaluation - 4.
-				if (u == 4 and v == 5) or (u == 5 and v == 4):
-					indiv.f_evaluation = indiv.f_evaluation - 3.	
-				if (u == 2 and v == 3) or (u == 3 and v == 2):
-					indiv.f_evaluation = indiv.f_evaluation - 2.						
-				if (u == 1 and v == 2) or (u == 2 and v == 1):
-					indiv.f_evaluation = indiv.f_evaluation - 1.
-					
+				edge_set = {edge[0], edge[1]}
+				if edge_set == {0, 3} or edge_set == {0, 5}:
+					indiv.f_evaluation -= 1.
+				elif edge_set == {3, 4} or edge_set == {5, 6}:
+					indiv.f_evaluation -= 2.
+				elif edge_set == {1, 2}:
+					indiv.f_evaluation -= 4.
+				elif edge_set == {1, 4} or edge_set == {1, 6}:
+					indiv.f_evaluation -= 8.
+				elif edge_set == {2, 4} or edge_set == {2, 6}:
+					indiv.f_evaluation -= 15.
 		# debug
 		# linha = ""
 		# for indiv in self.list_ga_indiv:
@@ -113,95 +94,116 @@ class GraphGA:
 		# print("Avaliacoes dos individuos: " + linha)
 					
 	
-	''' Função auxiliar para retornar a função de avaliação de um indivíduo'''	
+	''' 
+	Auxiliar function to get an individual's fitness function
+	'''
 	def f_eval_ga_obj(self, indiv):
 		return indiv.f_evaluation
-					
-					
+
+
+	'''  
+	Method to determine edges connected to a given vertice
+	'''
+	def edges_to_vertice(self, faulty_vertice):
+		edges_to_remove = []
+		for edge in self.lista_arestas:
+			if edge[0] == faulty_vertice or edge[1] == faulty_vertice:
+				edges_to_remove.append({edge[0], edge[1]})
+		return edges_to_remove
+
+
 	''' 
-		Método de seleção dos melhores indivíduos da geração
+	Method to pick generation's best individuals
 	'''
 	def graph_selection(self):
-		print("\nSelection")	
-		
-		# ordena a lista de indivíduos em termos de sua função de avaliação
+		# print("\nSelection")
+
+		# sort list of individuals in terms of their fitness
 		self.list_ga_indiv.sort(reverse=True, key = self.f_eval_ga_obj)
-		
-		# pega os N melhores indivíduos, em que N = num_individuals
+
+		# take N best individuals, where N = num_individuals
 		if len(self.list_ga_indiv)  > self.num_individuals:
-			n_apagar = len(self.list_ga_indiv) - self.num_individuals
+			n_delete = len(self.list_ga_indiv) - self.num_individuals
 			N_total = len(self.list_ga_indiv)
-			for i in range(n_apagar):
+			for i in range(n_delete):
 				indice = N_total - i - 1
-				obj_apagar = self.list_ga_indiv[indice]
-				self.list_ga_indiv.remove(obj_apagar)
-				del obj_apagar
-				
-		# debug
-		linha = ""
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			linha = linha + " " + str(indiv.f_evaluation)
-		print("Avaliacoes dos individuos: " + linha)
+				obj_delete = self.list_ga_indiv[indice]
+				self.list_ga_indiv.remove(obj_delete)
+				del obj_delete
+		# # debug
+		# linha = ""
+		# for indiv in self.list_ga_indiv:
+		# 	graph = indiv.graph
+		# 	linha = linha + " " + str(indiv.f_evaluation)
+		# print("Avaliacoes dos individuos: " + linha)
 		
 		
-		
-	''' Método para extração dos resultados '''
+	''' 
+	Method to extract results
+	'''
 	def get_results(self):
-		print("Extracao dos resultados")
+		# print("Extracao dos resultados")
+		pass
 		
 		
-	''' Criação de indivíduos iniciais do AG '''
+	''' 
+	Creation of GA initial individuals 
+	'''
 	def generate_individuals(self):
-		# Gera indivíduos iniciais
+		# determine number of vertices
+		list_of_vertices = []
+		for edge in self.lista_arestas:
+			if edge[0] not in list_of_vertices: list_of_vertices.append(edge[0])
+			if edge[1] not in list_of_vertices:	list_of_vertices.append(edge[1])
+		number_of_vertices = len(list_of_vertices)
+
 		for i in range(self.num_individuals):
-			graph = graphModule.Graph(self.num_vertices)  # obj de grafo		
-			for edge in self.lista_arestas:               # insere arestas
+			graph = graphModule.Graph(number_of_vertices) # graph obj
+			for edge in self.lista_arestas:               # inserts all possible edges
 				graph.addEdge(edge[0], edge[1], edge[2])
-			graph.KruskalRST()                            # gera grafo radial				
-			indiv = Indiv(graph, self.lista_arestas_iniciais)			
-			self.list_ga_indiv.append(indiv)              # guarda indivíduo em lista
+			graph.KruskalRST()                            # generate initial radial graph
+			indiv = Indiv(graph, self.initial_edges)
+			self.list_ga_indiv.append(indiv)              # stores individual in list
+		# #debug
+		# for indiv in self.list_ga_indiv:
+		# 	print(indiv.graph.edgesKRST)
+
 			
-		# debug
-		linha = ""
-		for ind in self.list_ga_indiv:
-			linha = linha + " " + str(ind.f_evaluation)
-		print("\nGeracao de individuos")
-		print("Avaliacoes dos individuos iniciais: " + linha)
-			
-			
-	''' Operador MUTAÇÃO '''
+	''' 
+	MUTATION operator for graphs
+	'''
 	def graph_mutation(self):
-		print("\nMutation: ")
+		# print("\nMutation: ")
 		for indiv in self.list_ga_indiv:
 			graph = indiv.graph
-			#print("Graph before mutation: ") ; graph.print_graph()
+			# print("Graph before mutation: ") ; graph.print_graph()
 			graph.mutation()
-			#print("Graph after mutation: ") ; graph.print_graph()
-			
-		# debug
-		linha = ""
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			linha = linha + " " + str(indiv.f_evaluation)
-		print("Avaliacoes dos individuos: " + linha)
+			# print("Graph after mutation: ") ; graph.print_graph()
+		# # debug
+		# linha = ""
+		# for indiv in self.list_ga_indiv:
+		# 	graph = indiv.graph
+		# 	linha = linha + " " + str(indiv.f_evaluation)
+		# print("Avaliacoes dos individuos: " + linha)
 	
 	
-	''' Operador UNIÃO '''
-	def unite_graphs(self, lista_arestas1, lista_arestas2):
+	''' 
+	UNION operator for graphs 
+	'''
+	def unite_graphs(self, lista_edges1, lista_edges2):
 		final_edges = []
-		for edge in lista_arestas1:
+		for edge in lista_edges1:
 			final_edges.append(edge)
-		for edge in lista_arestas2:
+		for edge in lista_edges2:
 			if edge not in final_edges:
 				final_edges.append(edge)
 		return final_edges
 	
 	
-	''' Operador CRUZAMENTO '''
+	'''
+	CROSSOVER OPERATOR for graphs
+	'''
 	def graph_crossover(self):
-		print("\nCrossover: ")
-		
 		# Generates pairs of indexes
 		indexes = list(range(len(self.list_ga_indiv)))
 		indexes_combinations = itertools.combinations(indexes, 2)
@@ -222,12 +224,8 @@ class GraphGA:
 			#print ("Final graph:") ; new_graph.print_graph()
 			
 			# Appends new graph individual into list of individuals
-			indiv = Indiv(new_graph, self.lista_arestas_iniciais)
+			indiv = Indiv(new_graph, self.initial_edges)
 			self.list_ga_indiv.append(indiv)
-			
-		# debug
-		linha = ""
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			linha = linha + " " + str(indiv.f_evaluation)
-		print("Avaliacoes dos individuos: " + linha)
+		# # debug
+		# for indiv in self.list_ga_indiv:
+		# 	print(indiv.graph.edgesKRST)

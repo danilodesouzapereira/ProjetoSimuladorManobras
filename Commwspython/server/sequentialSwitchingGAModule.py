@@ -78,7 +78,7 @@ class SSGA:
 		# determine opened switches and closed switches
 		self.determine_necessary_switchings()
 
-		# generate initial individuals, along with their GA chromosome
+		# generate initial individuals, along with their GA chromosomes
 		self.initialize_individuals()
 
 		# computes fitness function for each individual
@@ -86,6 +86,7 @@ class SSGA:
 
 		# iterates over generations
 		for i in range(self.num_generations):
+			print("   SSGA generation #" + str(i+1))
 			self.mutation()
 			self.crossover()
 			self.evaluate_individuals()
@@ -97,10 +98,12 @@ class SSGA:
 	Method to generate initial individuals
 	'''
 	def initialize_individuals(self):
-		print("num_individuals: " + str(self.num_individuals))
+		# print("num_individuals: " + str(self.num_individuals))
 		for i in range(self.num_individuals):
 			indiv = IndivSS()
 			self.list_ga_individuals.append(indiv)
+
+			# for each edge to be closed, appends a random number from [0,1]
 			for j in range(len(self.list_closed_switches)):
 				indiv.switching_chromosome.append(round(random.random(), 4))
 
@@ -129,11 +132,18 @@ class SSGA:
 	Method to interprete complete switching sequence
 	'''
 	def complete_switching_sequence(self, ssga_indiv):
+		list_pairs = []
+
+		# if only 1 edge to be closed and 0 edges to be opened:
+		if len(self.list_closed_switches) == 1 and len(self.list_opened_switches) == 0:
+			edge_close = list(self.list_closed_switches[0]); edge_close.append(1) # format: [u,v,w=1]
+			list_pairs.append([edge_close, []])
+			return list_pairs, None
+
 		random_keys = ssga_indiv.switching_chromosome
 		list_edges_close = []  # list of edges to be closed
 		list_edges_open = [] # list of edges to be opened
 		self.random_keys_to_edge(random_keys, list_edges_close)
-		list_pairs = []
 
 		# #debug
 		# linha = ""
@@ -152,7 +162,6 @@ class SSGA:
 		for edge_set in self.list_opened_switches:
 			edge = list(edge_set); edge.append(1)
 			list_edges_open.append(edge)
-
 
 		# disturbance technique: for each closed switch, determines
 		# switch to be opened to restore radiality
@@ -177,20 +186,31 @@ class SSGA:
 			if graph_simulation.creates_mesh(edge_close):
 				graph_simulation.edgesKRST.append(edge_close)
 				list_edges_close.remove(edge_close_set)  # removes from list "to be closed"
-				# Opens a given edge to re-establish radiality. Format: {u,v}.
+				# Opens a given edge to re-establish radiality. Format: [u, v, w]
 				edge_open = graph_simulation.edge_to_open_mesh(list_edges_open)
-				list_edges_open.remove(edge_open)
-				list_pairs.append([edge_close, edge_open])
+
+				if edge_open is None:
+					return None, "   *** PROBLEM: no edge to open"
+
+				edge_open_1 = [edge_open[0], edge_open[1], 1]
+				edge_open_2 = [edge_open[1], edge_open[0], 1]
+				if edge_open_1 in list_edges_open:   edge_open = edge_open_1
+				elif edge_open_2 in list_edges_open: edge_open = edge_open_2
+				else:                                edge_open = None
+				if edge_open is not None:
+					list_edges_open.remove(edge_open)
+					list_pairs.append([edge_close, edge_open])
+				else:
+					return None, (str(edge_open) + " not in " + str(list_edges_open))
 			else:
 				graph_simulation.edgesKRST.append(edge_close)
 				list_edges_close.remove(edge_close_set)  # removes from list "to be closed"
 				list_pairs.append([edge_close, []])
-
-		#debug
-		line = ""
-		for pair in list_pairs:
-			line += str(pair) + " "
-		print("Pairs: " + line)
+		# #debug
+		# line = ""
+		# for pair in list_pairs:
+		# 	line += str(pair) + " "
+		# print("Pairs: " + line)
 
 
 		# for edge_closed_set in list_edges_close:
@@ -205,15 +225,26 @@ class SSGA:
 		# for edge_closed in list_edges_close:
 		# 	linha += str(edge_closed) + " "
 		# print("Edges to close: " + linha)
+		return list_pairs, None
 
 
 	'''
 	Method to compute fitness function of GA individuals
 	'''
 	def evaluate_individuals(self):
-		for ssga_indiv in self.list_ga_individuals:
+		for i in reversed(range(len(self.list_ga_individuals))):
+			ssga_indiv = self.list_ga_individuals[i]
+
 			# determines individual's switching sequence
-			self.complete_switching_sequence(ssga_indiv)
+			sw_seq, str_details = self.complete_switching_sequence(ssga_indiv)
+
+			# in case of problems with sequencing, deletes individual
+			if sw_seq is None:
+				self.list_ga_individuals.remove(ssga_indiv)
+				print("Problema: " + str_details)
+				del ssga_indiv ; continue
+			#debug
+			# print("SSGA individual #" + str(i+1) + " - " + str(sw_seq))
 
 
 	'''
@@ -265,18 +296,19 @@ class SSGA:
 		for edge in self.initial_edges:
 			set_vertices_ini_graph.add(edge[0]) ; set_vertices_ini_graph.add(edge[1])
 			self.initial_graph_data["edges"].append({edge[0], edge[1]})	# appends edge as set to avoid duplicity
-		self.initial_graph_data["vertices"] = list(set_vertices_ini_graph)					
-		print("\n\nGrafo inicial:")
-		print(self.initial_graph_data)
-			
+		self.initial_graph_data["vertices"] = list(set_vertices_ini_graph)
+		#debug
+		# linha = "\nInitial graph - " + str(self.initial_graph_data["edges"])
+
 		# gets all final graph vertices
 		set_vertices_final_graph = set([])
 		for edge in self.graph.edgesKRST:
 			set_vertices_final_graph.add(edge[0]) ; set_vertices_final_graph.add(edge[1])	
 			self.final_graph_data["edges"].append({edge[0], edge[1]})		# appends edge as set to avoid duplicity	
 		self.final_graph_data["vertices"] = list(set_vertices_final_graph)
-		print("Grafo final:")
-		print(self.final_graph_data)
+		#debug
+		# linha += " Final graph - " + str(self.final_graph_data["edges"])
+		# print(linha)
 		
 		# gets closed and opened switches
 		for edge in self.final_graph_data["edges"]:
@@ -285,7 +317,7 @@ class SSGA:
 		for edge in self.initial_graph_data["edges"]:
 			if edge not in self.final_graph_data["edges"]:
 				self.list_opened_switches.append(edge)
-
 		#debug
-		print("Abertas: " + str(self.list_opened_switches))
-		print("Fechadas: " + str(self.list_closed_switches))
+		# linha = "Op: " + str(self.list_opened_switches)
+		# linha += " Cl: " + str(self.list_closed_switches)
+		# print("SWITCHINGS - " + linha)

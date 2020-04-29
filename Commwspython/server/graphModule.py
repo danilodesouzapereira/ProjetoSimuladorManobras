@@ -15,19 +15,26 @@ class Graph:
 		self.graph = [] # default dictionary to store graph 	
 		self.edgesKRST = [] # stores edges after KruskalRST procedure
 
-	''' Function to add an edge to graph '''
+	'''
+	Function to add an edge to graph
+	'''
 	def addEdge(self,u,v,w): 
-		self.graph.append([u,v,w]) 
+		self.graph.append([u,v,w])
 
-		
-	''' Utility function to find set of an element i (uses path compression technique) '''
+
+	''' 
+	Utility function to find set of an element i
+	(uses path compression technique) 
+	'''
 	def find(self, parent, i): 
 		if parent[i] == i: 
 			return i 
 		return self.find(parent, parent[i]) 
 
 		
-	''' Function to plot graph '''
+	''' 
+	Function to plot graph 
+	'''
 	def plot_graph(self):
 		g = nx.Graph()
 		nodes_list = set([])
@@ -44,7 +51,9 @@ class Graph:
 		plt.show()
 	
 		
-	''' Function that does union of two sets of x and y (uses union by rank) '''
+	''' 
+	Function that does union of two sets of x and y (uses union by rank) 
+	'''
 	def union(self, parent, rank, x, y): 
 		xroot = self.find(parent, x) 
 		yroot = self.find(parent, y) 
@@ -63,7 +72,9 @@ class Graph:
 			rank[xroot] += 1
 
 			
-	''' The main function to construct MST using Kruskal's algorithm '''
+	''' 
+	The main function to construct MST using Kruskal's algorithm 
+	'''
 	def KruskalMST(self): 
 
 		result =[] #This will store the resultant MST 
@@ -107,8 +118,7 @@ class Graph:
 		#print("Following are the edges in the constructed MST")
 		#for u,v,weight in result: 
 			#print str(u) + " -- " + str(v) + " == " + str(weight) 
-			#print ("%d -- %d == %d" % (u,v,weight)) 
-			
+			#print ("%d -- %d == %d" % (u,v,weight))
 	# Crossover operator. It takes two parent individuals and generates
 	# offspring which contains characteristics from both parents.
 	#def crossover(self, parent_edges_1, parent_edges_2):
@@ -180,25 +190,32 @@ class Graph:
 		if list_switches_to_open is None: return None
 		if len(list_switches_to_open) == 0: return None
 
-
 		str_conn_edges = ""
 		for edge in self.edgesKRST:
 			str_conn_edges += str(edge) + " "
 		str_sw_to_open = ""
 		for edge in list_switches_to_open:
 			str_sw_to_open += str(edge) + " "
-		print("connected edges: " + str_conn_edges + " switches to open: " + str_sw_to_open)
+		# print("connected edges: " + str_conn_edges + " switches to open: " + str_sw_to_open)
 
 		# Among the edges that need to be opened, picks an edge
 		# to be opened in order to restore radiality
-		for edge in list_switches_to_open:
-			edge_list = list(edge) ; edge_to_be_opened = [edge_list[0], edge_list[1], 1]
+		for edge_to_be_opened in list_switches_to_open:
+			# edge_list = list(edge) ; edge_to_be_opened = [edge_list[0], edge_list[1], 1]
 
 			# tries to remove edge_to_be_opened from graph
+			edge_to_be_opened_1 = [edge_to_be_opened[0], edge_to_be_opened[1], 1]
+			edge_to_be_opened_2 = [edge_to_be_opened[1], edge_to_be_opened[0], 1]
+			if edge_to_be_opened_1 in self.edgesKRST:
+				edge_to_be_opened = edge_to_be_opened_1
+			elif edge_to_be_opened_2 in self.edgesKRST:
+				edge_to_be_opened = edge_to_be_opened_2
+
+			# print("edge_to_be_opened: " + str(edge_to_be_opened))
 			self.edgesKRST.remove(edge_to_be_opened)
 
 			# if resulting graph is radial, returns.
-			if self.is_radial(): return edge
+			if self.is_radial(): return edge_to_be_opened
 			else: self.edgesKRST.append(edge_to_be_opened)
 		return None
 
@@ -239,14 +256,18 @@ class Graph:
 		return None
 
 		
-	''' Function to print graph '''
+	''' 
+	Function to print graph 
+	'''
 	def print_graph(self):
 		# print the contents of result[] to display the built MST 
 		for edge in self.edgesKRST: 
 			print ("%d -- %d" % (edge[0],edge[1])) 
 				
 				
-	''' The main function to construct RST using Kruskal's algorithm '''
+	''' 
+	The main function to construct RST using Kruskal's algorithm 
+	'''
 	def KruskalRST(self): 
 
 		result = [] # This will store the resultant RST 

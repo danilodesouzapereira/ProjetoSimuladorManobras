@@ -16,9 +16,7 @@ class DSS(object):
 	
 		self.dss_folder = dss_folder	
 		self.dssObj = win32com.client.Dispatch("OpenDSSEngine.DSS")				
-		if self.dssObj.Start(0) == True:
-			print("opendss inicializado")
-		else:
+		if not self.dssObj.Start(0):
 			print("opendss nao inicializado")			
 		self.dssText = self.dssObj.Text
 		self.dssCircuit = self.dssObj.ActiveCircuit
