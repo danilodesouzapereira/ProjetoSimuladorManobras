@@ -23,9 +23,8 @@ def nova_simulacao():
 	dados_simulacao = request.get_json() # pega os dados das arestas
 	simulador = simuladorManobras.SM(dados_simulacao)
 	simulador.run_simulator()
-	#simulador.print_data()
-	#simulador.print_output()
-	#simulador = None
+	simulador.return_response()
+
 	return jsonify({}), 200
 
 

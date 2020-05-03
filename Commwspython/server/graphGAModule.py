@@ -1,6 +1,7 @@
 import graphModule
 import itertools
 import sequentialSwitchingGAModule
+import numpy as np
 
 
 #===================================================================================#
@@ -11,16 +12,21 @@ class Indiv:
 	def __init__(self, graph, initial_edges):
 		self.initial_edges = initial_edges
 		self.graph = graph
-		self.f_evaluation = 100.0
+		self.f_evaluation = 0.0
+		self.list_sw_changes = []
+		self.list_sw_changes_codes = []
 
 #===================================================================================#
 
 '''
 Class to represent GA applied to graphs 
 '''
-class GraphGA: 
-	def __init__(self, sm_folder, graph_descr, settings_graph_ga, settings_switching_ga, sw_assessment):
+class GraphGA:
+	def __init__(self, sm_folder, settings_graph_ga, settings_switching_ga, sw_assessment, networks_data):
 		self.sm_folder = sm_folder
+
+		# data concerning the power networks investigated
+		self.networks_data = networks_data
 
 		# object for switching sequencing assessment
 		self.sw_assessment = sw_assessment
@@ -30,15 +36,63 @@ class GraphGA:
 		self.num_individuals = settings_graph_ga.get('num_individuals')
 		self.pc = settings_graph_ga.get('pc')
 		self.pm = settings_graph_ga.get('pm')
-		self.lista_arestas = graph_descr.get('edges')
-		self.initial_edges = graph_descr.get('initial_edges')
 		self.settings_switching_ga = settings_switching_ga
 
+		# Get data concerning networks' graph
+		self.lista_arestas = []
+		self.initial_edges = []
+		dicts_edges = networks_data.list_graph_operable_switches_dicts
+		for dict_edge in dicts_edges:
+			self.lista_arestas.append([dict_edge['v1'], dict_edge['v2'], 1])
+			if dict_edge['initial']:
+				self.initial_edges.append([dict_edge['v1'], dict_edge['v2'], 1])
+		
 		# List of GA individuals. Each individuals contains:
 		# Initial graph, final graph, fitness value
 		self.list_ga_indiv = []
-
 		
+		# Reference to Graph-based GA best individual
+		self.best_indiv : Indiv = None
+
+
+	def print_fitness_function(self):
+		# debug - get all fitness functions
+		list_fitness = []
+		for indiv in self.list_ga_indiv:
+			f_aval = indiv.f_evaluation
+			list_fitness.append(round(f_aval,6))
+		list_fitness.sort()
+
+		best_fitness = list_fitness[0]
+		avg_fitness = np.average(list_fitness)
+
+		fitness_functions = ""
+		for fitness in list_fitness:
+			fitness_functions += str(fitness) + " "
+		print("Fitness functions: " + fitness_functions)
+		print("Avg: " + str(round(avg_fitness, 6)) + " Best: " + str(round(best_fitness, 6)))
+
+	'''
+	Method to verify if GA individuals have achieved convergence by analyzing
+	maximum and average values of fitness functions
+	'''
+
+	def has_convergence(self):
+		num_indiv = len(self.list_ga_indiv)
+		if num_indiv == 0: return False
+		average_evaluation = 0. ; min_evaluation = -1.
+		for indiv in self.list_ga_indiv:
+			average_evaluation += indiv.f_evaluation # sum fitness funct. values
+			if min_evaluation == -1. or indiv.f_evaluation < min_evaluation: # updates maximum fitness function
+				min_evaluation = indiv.f_evaluation
+		average_evaluation /= num_indiv
+
+		# computes difference between maximum and average fitness function (percentage)
+		if average_evaluation <= 0.: return False
+		diff = 100. * abs(average_evaluation - min_evaluation) / average_evaluation
+		return diff <= 0.01
+
+
 	''' 
 	Main method, which effectively runs GA
 	'''
@@ -46,6 +100,9 @@ class GraphGA:
 		print(" ============== 1st stage - Initial generation ===============")
 		self.generate_individuals()
 		self.run_gga_optimal_switching()
+
+		# Print fitness function
+		self.print_fitness_function()
 		
 		# 1st stage GA generations
 		for i in range(self.num_geracoes):
@@ -54,53 +111,44 @@ class GraphGA:
 			self.graph_crossover()
 			self.run_gga_optimal_switching()
 			self.graph_selection()
-		# debug
-		# for indiv in self.list_ga_indiv:
-			# graph = indiv.graph
-			# graph.plot_graph()
-			
-		
+
+			# Print fitness function
+			self.print_fitness_function()
+
+			if self.has_convergence():
+				break
+
+
 	''' 
-   Runs GA 2nd stage, which consists of determining an
-   optimal switching sequence for a given alternative
+	Runs GA 2nd stage, which consists of determining an
+	optimal switching sequence for a given alternative
 	'''
 	def run_gga_optimal_switching(self):
 		print("\n================ 2nd stage - SSGA =======================")
 		
 		# runs Seq. Switching GA for each individual
 		for i in range(len(self.list_ga_indiv)):
-			print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")
+			# print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")
 			indiv = self.list_ga_indiv[i]
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
 			ssga = sequentialSwitchingGAModule.SSGA(self.sm_folder,
 																 indiv.graph,
 																 indiv.initial_edges,
 																 self.settings_switching_ga,
-																 self.sw_assessment)
+																 self.sw_assessment,
+																 self.networks_data)
+			# runs SSGA (Sequential Switching Genetic Algorithm)
 			ssga.run_ssga()
 
-		# Debug: inserts individuals' GA assessment (fitness)
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			for edge in graph.edgesKRST:
-				edge_set = {edge[0], edge[1]}
-				if edge_set == {0, 3} or edge_set == {0, 5}:
-					indiv.f_evaluation -= 1.
-				elif edge_set == {3, 4} or edge_set == {5, 6}:
-					indiv.f_evaluation -= 2.
-				elif edge_set == {1, 2}:
-					indiv.f_evaluation -= 4.
-				elif edge_set == {1, 4} or edge_set == {1, 6}:
-					indiv.f_evaluation -= 8.
-				elif edge_set == {2, 4} or edge_set == {2, 6}:
-					indiv.f_evaluation -= 15.
-		# debug
-		# linha = ""
-		# for indiv in self.list_ga_indiv:
-			# graph = indiv.graph
-			# linha = linha + " " + str(indiv.f_evaluation)
-		# print("Avaliacoes dos individuos: " + linha)
-					
+			# stores fitness function of Graph GA individual based on SSGA best individual fitness
+			indiv.f_evaluation = ssga.best_indiv['fitness']
+			indiv.list_sw_changes = ssga.best_indiv['sw']
+			indiv.list_sw_changes_codes = ssga.best_indiv['sw_codes']
+			
+			# renew Graphic GA best individual
+			if self.best_indiv is None or indiv.f_evaluation < self.best_indiv.f_evaluation:
+				self.best_indiv = indiv
+
 	
 	''' 
 	Auxiliar function to get an individual's fitness function
@@ -127,7 +175,7 @@ class GraphGA:
 		# print("\nSelection")
 
 		# sort list of individuals in terms of their fitness
-		self.list_ga_indiv.sort(reverse=True, key = self.f_eval_ga_obj)
+		self.list_ga_indiv.sort(reverse=False, key = self.f_eval_ga_obj)
 
 		# take N best individuals, where N = num_individuals
 		if len(self.list_ga_indiv)  > self.num_individuals:
@@ -150,9 +198,11 @@ class GraphGA:
 	Method to extract results
 	'''
 	def get_results(self):
-		# print("Extracao dos resultados")
-		pass
-		
+		eval_best_indiv = round(self.best_indiv.f_evaluation,6)
+		list_sw_changes = self.best_indiv.list_sw_changes_codes
+		dict_results = {'Fitness':eval_best_indiv, 'actions':list_sw_changes}
+		return dict_results
+
 		
 	''' 
 	Creation of GA initial individuals 
@@ -165,7 +215,7 @@ class GraphGA:
 			if edge[1] not in list_of_vertices:	list_of_vertices.append(edge[1])
 		number_of_vertices = len(list_of_vertices)
 
-		for i in range(self.num_individuals):
+		for i in range(round(1.3 * self.num_individuals)):
 			graph = graphModule.Graph(number_of_vertices) # graph obj
 			for edge in self.lista_arestas:               # inserts all possible edges
 				graph.addEdge(edge[0], edge[1], edge[2])
