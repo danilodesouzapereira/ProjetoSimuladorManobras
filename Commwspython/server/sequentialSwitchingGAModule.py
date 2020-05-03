@@ -1,9 +1,11 @@
-import dss  # OpenDSS connection for power flow simulations
 import random
 import itertools
 import graphModule
+import switchingAssessmentModule
+import converterGraphDSSModule
 
 
+#===================================================================================#
 ''' 
 Class to represent optimal switching Genetic Algorithm Individuals
 '''
@@ -14,15 +16,25 @@ class IndivSS:
 		# self.SSGA_settings = SSGA_settings
 		self.switching_chromosome = []
 		self.fitness_function = 0.
-		pass
 
+#===================================================================================#
 
 ''' 
 Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
 '''
 class SSGA:
-	def __init__(self, graph, initial_edges, SSGA_settings):
+	def __init__(self, sm_folder, graph, initial_edges, SSGA_settings, sw_assessment):
+		# fundamental parameters
+		self.sw_assessment : switchingAssessmentModule.AssessSSGAIndiv  = sw_assessment
 		self.graph = graph
+
+		# graph data
+		pathXMLgrafo = sm_folder + "GrafoAlimentadores.xml"
+		self.conversorGrafoRede = converterGraphDSSModule.ConversorGrafoDSS(pathXMLgrafo)
+		self.conversorGrafoRede.read_xml_network_graph()
+		#self.conversorGrafoRede.imprime_arestas()
+
+		# local variables
 		self.initial_edges = initial_edges
 		self.initial_graph_data = {"vertices":[], "edges":[]}
 		self.final_graph_data = {"vertices":[], "edges":[]}
@@ -30,7 +42,7 @@ class SSGA:
 		self.list_opened_switches = []  # switches opened (initially closed ==> finally opened)
 		self.list_ga_individuals = []  # list of GA individuals
 
-		# Genetic algorithm settings
+		# Sw. Sequencing GA settings
 		self.SSGA_settings = SSGA_settings
 		self.num_generations = SSGA_settings.get('num_geracoes')
 		self.num_individuals = SSGA_settings.get('num_individuos')
@@ -82,16 +94,23 @@ class SSGA:
 		self.initialize_individuals()
 
 		# computes fitness function for each individual
-		self.evaluate_individuals()
+		best_indiv_dict = self.evaluate_individuals()
 
 		# iterates over generations
 		for i in range(self.num_generations):
 			print("   SSGA generation #" + str(i+1))
 			self.mutation()
 			self.crossover()
-			self.evaluate_individuals()
+			best_indiv_dict_gen = self.evaluate_individuals()
+
+			#renew best individual
+			if best_indiv_dict_gen['fitness'] < best_indiv_dict['fitness']:
+				best_indiv_dict = best_indiv_dict_gen
+
 			if self.has_convergence():
 				break
+		#debug
+		a=0
 
 
 	'''
@@ -113,19 +132,20 @@ class SSGA:
 	maximum and average values of fitness functions
 	'''
 	def has_convergence(self):
-		num_indiv = len(self.list_ga_individuals)
-		if num_indiv == 0: return False
-		average_evaluation = 0. ; max_evaluation = 0.
-		for indiv in self.list_ga_individuals:
-			average_evaluation += indiv.fitness_function # sum fitness funct. values
-			if indiv.fitness_function > max_evaluation: # updates maximum fitness function
-				max_evaluation = indiv.fitness_function
-		average_evaluation /= num_indiv
-
-		# computes difference between maximum and average fitness function (percentage)
-		if average_evaluation <= 0.: return False
-		diff = 100. * abs(average_evaluation - max_evaluation) / average_evaluation
-		return diff <= self.min_porc_fitness
+		# num_indiv = len(self.list_ga_individuals)
+		# if num_indiv == 0: return False
+		# average_evaluation = 0. ; max_evaluation = 0.
+		# for indiv in self.list_ga_individuals:
+		# 	average_evaluation += indiv.fitness_function # sum fitness funct. values
+		# 	if indiv.fitness_function > max_evaluation: # updates maximum fitness function
+		# 		max_evaluation = indiv.fitness_function
+		# average_evaluation /= num_indiv
+      #
+		# # computes difference between maximum and average fitness function (percentage)
+		# if average_evaluation <= 0.: return False
+		# diff = 100. * abs(average_evaluation - max_evaluation) / average_evaluation
+		# return diff <= self.min_porc_fitness
+		return False
 
 
 	'''
@@ -212,7 +232,6 @@ class SSGA:
 		# 	line += str(pair) + " "
 		# print("Pairs: " + line)
 
-
 		# for edge_closed_set in list_edges_close:
 		# 	if graph_simulation.creates_mesh(edge_closed_set):
 		# 		# determines edge to be opened to restore radiality
@@ -229,9 +248,13 @@ class SSGA:
 
 
 	'''
-	Method to compute fitness function of GA individuals
+	Method to compute fitness function of GA individuals. It is based on simulations
+	aimed to reproduce the effects of the investigated switching steps
 	'''
 	def evaluate_individuals(self):
+		#debug
+		best_indiv = {'sw':None, 'fitness':0.0}
+
 		for i in reversed(range(len(self.list_ga_individuals))):
 			ssga_indiv = self.list_ga_individuals[i]
 
@@ -245,6 +268,86 @@ class SSGA:
 				del ssga_indiv ; continue
 			#debug
 			# print("SSGA individual #" + str(i+1) + " - " + str(sw_seq))
+
+			# determines the codes of switches that need to be closed/opened
+			# format: list of dictionaries
+			sw_changes = self.compute_switching_changes(sw_seq)
+
+			# determines initial states of network's switches
+			dict_sw_states = self.determine_sw_initial_states()
+
+			# compute load flow merit index
+			LF_MI = self.sw_assessment.load_flow_merit_index(dict_sw_states, sw_changes)
+
+			# attributes load flow merit index to fitness function value
+			ssga_indiv.fitness_function = LF_MI
+
+
+			#debug
+			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness_function:
+				best_indiv['sw'] = sw_seq ; best_indiv['fitness'] = ssga_indiv.fitness_function
+
+		#debug
+		return best_indiv
+
+
+	'''
+	Method to determine initial states of network's switches
+	'''
+	def determine_sw_initial_states(self):
+		all_switches = self.get_all_switches()
+		closed_switches = [] ; opened_switches = []
+		for edge_set in self.initial_graph_data["edges"]:
+			sw = self.get_sw_code(list(edge_set))
+			closed_switches.append(sw)
+		for sw in all_switches:
+			if sw not in closed_switches:
+				opened_switches.append(sw)
+		return {'closed_switches':closed_switches, 'opened_switches':opened_switches}
+
+
+	''' Method to compute switching changes to be assessed '''
+	def compute_switching_changes(self, sw_seq):
+		list_actions = []
+		for pair in sw_seq:
+			if len(pair[0]) > 0:
+				edge_close = pair[0] ; sw_code = self.get_sw_code(edge_close)
+				list_actions.append({'code':sw_code, 'action':'cl'})
+
+			if len(pair[1]) > 0:
+				print("pair[1]: " + str(type(pair[1])))
+				edge_open = pair[1] ; sw_code = self.get_sw_code(edge_open)
+				list_actions.append({'code':sw_code, 'action':'op'})
+		return list_actions
+
+
+	'''
+	Method to get all switches of the current power network
+	'''
+	def get_all_switches(self):
+		sw_codes = []
+		for edge_dict in self.conversorGrafoRede.edges_list:
+			sw_codes.append(edge_dict['code_sw'])
+		return sw_codes
+
+	'''
+	Get switch code corresponding to a given edge.
+	The edge has the format: [u, v, w]
+	'''
+	def get_sw_code(self, edge):
+		if edge is None: return ""
+
+		# Gets edge's vertices 'u' and 'v'
+		u = edge[0] ; v = edge[1]
+
+		# Searches for [u,v] in list of network's graph topology
+		for edge_dict in self.conversorGrafoRede.edges_list:
+			if edge_dict['vertice_1'] == str(u) and edge_dict['vertice_2'] == str(v):
+				return edge_dict['code_sw']
+			elif edge_dict['vertice_1'] == str(v) and edge_dict['vertice_2'] == str(u):
+				return edge_dict['code_sw']
+		return ""
+
 
 
 	'''

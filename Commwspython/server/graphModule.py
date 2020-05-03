@@ -2,7 +2,7 @@
 # Minimum Spanning Tree of a given connected, 
 # undirected and weighted graph 
 
-from collections import defaultdict
+# from collections import defaultdict
 import random 
 import networkx as nx
 import matplotlib.pyplot as plt

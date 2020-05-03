@@ -1,41 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DadosGrafo>
+	<Alimentadores>
+		<Alimentador>
+			<CodigoAlimentador>alim1</CodigoAlimentador>
+			<ChaveProtecao>dj1</ChaveProtecao>
+		</Alimentador>
+		<Alimentador>
+			<CodigoAlimentador>alim2</CodigoAlimentador>
+			<ChaveProtecao>dj2</ChaveProtecao>
+		</Alimentador>
+		<Alimentador>
+			<CodigoAlimentador>alim3</CodigoAlimentador>
+			<ChaveProtecao>dj3</ChaveProtecao>
+		</Alimentador>
+	</Alimentadores>
 	<Arestas>
 		<Aresta>
 			<Id>0</Id>
 			<CodigoChave>dj1</CodigoChave>
-		</Aresta>
-		<Aresta>
-			<Id>1</Id>
-			<CodigoChave>cf1</CodigoChave>
+			<Vertice1>0</Vertice1>
+			<Vertice2>1</Vertice2>
 		</Aresta>		
 		<Aresta>
-			<Id>2</Id>
-			<CodigoChave>cf2</CodigoChave>
+			<Id>1</Id>
+			<CodigoChave>dj2</CodigoChave>
+			<Vertice1>0</Vertice1>
+			<Vertice2>4</Vertice2>
 		</Aresta>
+		<Aresta>
+			<Id>2</Id>
+			<CodigoChave>dj3</CodigoChave>
+			<Vertice1>0</Vertice1>
+			<Vertice2>6</Vertice2>
+		</Aresta>		
 		<Aresta>
 			<Id>3</Id>
-			<CodigoChave>cf3</CodigoChave>
-		</Aresta>
+			<CodigoChave>cf1</CodigoChave>
+			<Vertice1>1</Vertice1>
+			<Vertice2>2</Vertice2>
+		</Aresta>		
 		<Aresta>
 			<Id>4</Id>
-			<CodigoChave>cf4</CodigoChave>
-		</Aresta>
+			<CodigoChave>cf2</CodigoChave>
+			<Vertice1>2</Vertice1>
+			<Vertice2>3</Vertice2>
+		</Aresta>		
 		<Aresta>
 			<Id>5</Id>
-			<CodigoChave>cf5</CodigoChave>
+			<CodigoChave>cf3</CodigoChave>
+			<Vertice1>4</Vertice1>
+			<Vertice2>5</Vertice2>
 		</Aresta>
 		<Aresta>
 			<Id>6</Id>
-			<CodigoChave>cf6</CodigoChave>
+			<CodigoChave>cf4</CodigoChave>
+			<Vertice1>6</Vertice1>
+			<Vertice2>7</Vertice2>
 		</Aresta>
 		<Aresta>
 			<Id>7</Id>
-			<CodigoChave>cf7</CodigoChave>
+			<CodigoChave>cf5</CodigoChave>
+			<Vertice1>2</Vertice1>
+			<Vertice2>7</Vertice2>
 		</Aresta>
 		<Aresta>
 			<Id>8</Id>
+			<CodigoChave>cf6</CodigoChave>
+			<Vertice1>3</Vertice1>
+			<Vertice2>7</Vertice2>
+		</Aresta>
+		<Aresta>
+			<Id>9</Id>
+			<CodigoChave>cf7</CodigoChave>
+			<Vertice1>2</Vertice1>
+			<Vertice2>5</Vertice2>
+		</Aresta>
+		<Aresta>
+			<Id>10</Id>
 			<CodigoChave>cf8</CodigoChave>
+			<Vertice1>3</Vertice1>
+			<Vertice2>5</Vertice2>
 		</Aresta>
 	</Arestas>
 </DadosGrafo>

@@ -1,38 +1,7 @@
 import graphGAModule
 import switchingAssessmentModule
-import xml.etree.ElementTree as ET
 
-#===================================================================================#
-'''
-Class to convert graphs' data (edges and vertices) into 
-their corresponding power networks' (opendss) data.
-'''
-class ConversorGrafoDSS(object):
-	def __init__(self, xml_file_path):
-		self.xml_file = None
-		self.xml_file_path = xml_file_path
-		self.listaArestas = []
-		
-		
-	''' Method to read XML file with power networks' data '''
-	def le_xml_dados_redes(self):
-		self.xml_file = ET.parse(self.xml_file_path)
-		no_raiz = self.xml_file.getroot()
-		no_arestas = no_raiz.find('Arestas')
-		for no_aresta in no_arestas:
-			id_chave = no_aresta.find('Id').text
-			cod_chave = no_aresta.find('CodigoChave').text	
-			self.listaArestas.append([id_chave, cod_chave])
-		
-		
-	'''
-	DEBUG method 
-	'''
-	def imprime_arestas(self):
-		for aresta in self.listaArestas:
-			print("Id da Aresta: " + str(aresta[0]) + " Codigo da chave: " + str(aresta[1]))
-	
-	
+
 #===================================================================================#	
 '''
 Main class: SM (Simulador de Manobras)
@@ -40,16 +9,11 @@ Main class: SM (Simulador de Manobras)
 class SM(object):
 	def __init__(self, dados_simulacao):
 		self.dados_simulacao = dados_simulacao # contains data and settings
-		path_folder = self.dados_simulacao['local_dss'] # folder with DSS files
-		pathXMLgrafo = path_folder + "\\..\\GrafoAlimentadores.xml" 
-		
+		dss_files_folder = self.dados_simulacao['local_dss'] # folder with DSS files
+
 		# object to assess sequential switching through load flow simulations
-		self.sw_assessment = switchingAssessmentModule.AssessSSGAIndiv(path_folder)
-		
-		# graph data
-		self.conversorGrafoRede = ConversorGrafoDSS(pathXMLgrafo)   
-		self.conversorGrafoRede.le_xml_dados_redes()
-		#self.conversorGrafoRede.imprime_arestas()
+		self.sm_folder = dss_files_folder + "\\..\\"
+		self.sw_assessment = switchingAssessmentModule.AssessSSGAIndiv(dss_files_folder)
 
 		# definitions of settings dictionaries
 		self.graph_descr = {}
@@ -94,8 +58,15 @@ class SM(object):
 	Main method - execution of Graph GA (1st stage)
 	'''
 	def run_simulator(self):
+		# Initialize definitions and settings
+		self.definitions_and_settings()
+
 		# Initialize graph GA object
-		gga = graphGAModule.GraphGA(self.graph_descr, self.settings_graph_GA, self.settings_switching_GA)
+		gga = graphGAModule.GraphGA(self.sm_folder,
+											 self.graph_descr,
+											 self.settings_graph_GA,
+											 self.settings_switching_GA,
+											 self.sw_assessment)
 
 		# Runs GA
 		gga.run_gga()

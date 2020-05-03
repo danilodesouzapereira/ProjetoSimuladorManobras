@@ -3,6 +3,7 @@ import itertools
 import sequentialSwitchingGAModule
 
 
+#===================================================================================#
 '''  
 Class to represent Graph GA individual
 '''
@@ -18,8 +19,13 @@ class Indiv:
 Class to represent GA applied to graphs 
 '''
 class GraphGA: 
-	def __init__(self, graph_descr, settings_graph_ga, settings_switching_ga):
-		# Parâmetros do AG
+	def __init__(self, sm_folder, graph_descr, settings_graph_ga, settings_switching_ga, sw_assessment):
+		self.sm_folder = sm_folder
+
+		# object for switching sequencing assessment
+		self.sw_assessment = sw_assessment
+
+		# graph GA parameter
 		self.num_geracoes = settings_graph_ga.get('num_generations')
 		self.num_individuals = settings_graph_ga.get('num_individuals')
 		self.pc = settings_graph_ga.get('pc')
@@ -66,9 +72,11 @@ class GraphGA:
 			print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")
 			indiv = self.list_ga_indiv[i]
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
-			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
+			ssga = sequentialSwitchingGAModule.SSGA(self.sm_folder,
+																 indiv.graph,
 																 indiv.initial_edges,
-																 self.settings_switching_ga)
+																 self.settings_switching_ga,
+																 self.sw_assessment)
 			ssga.run_ssga()
 
 		# Debug: inserts individuals' GA assessment (fitness)

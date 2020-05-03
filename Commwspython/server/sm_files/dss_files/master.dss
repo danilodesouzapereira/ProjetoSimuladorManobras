@@ -1,25 +1,20 @@
+!suprimento
 new circuit.VVE bus1=MT basekv=13.8 pu=1.0000 r1=0.001 x1=0.1
+
+!arranjos
 new linecode.arranjo nphases=3 r0=0.2 x0=0.4 r1=0.1 x1=0.25 units=km
 
-new line.dj1 phases=3 bus1=MT.1.2.3 bus2=10.1.2.3 switch=yes enabled=true
-new line.cf1 phases=3 bus1=30.1.2.3 bus2=40.1.2.3 switch=yes enabled=true
-new line.cf2 phases=3 bus1=60.1.2.3 bus2=70.1.2.3 switch=yes enabled=true
+!trechos
 new line.10_20 phases=3 bus1=10.1.2.3 bus2=20.1.2.3 length=3 linecode=arranjo
 new line.20_30 phases=3 bus1=20.1.2.3 bus2=30.1.2.3 length=3 linecode=arranjo
 new line.40_50 phases=3 bus1=40.1.2.3 bus2=50.1.2.3 length=3 linecode=arranjo
 new line.50_60 phases=3 bus1=50.1.2.3 bus2=60.1.2.3 length=3 linecode=arranjo
 new line.70_80 phases=3 bus1=70.1.2.3 bus2=80.1.2.3 length=3 linecode=arranjo
-
-new line.dj2 phases=3 bus1=MT.1.2.3 bus2=11.1.2.3 switch=yes enabled=true
-new line.cf3 phases=3 bus1=31.1.2.3 bus2=41.1.2.3 switch=yes enabled=true
 new line.11_21 phases=3 bus1=11.1.2.3 bus2=21.1.2.3 length=3 linecode=arranjo
 new line.21_31 phases=3 bus1=21.1.2.3 bus2=31.1.2.3 length=3 linecode=arranjo
 new line.41_51 phases=3 bus1=41.1.2.3 bus2=51.1.2.3 length=3 linecode=arranjo
 new line.51_61 phases=3 bus1=51.1.2.3 bus2=61.1.2.3 length=3 linecode=arranjo
 new line.71_81 phases=3 bus1=61.1.2.3 bus2=71.1.2.3 length=3 linecode=arranjo
-
-new line.dj3 phases=3 bus1=MT.1.2.3 bus2=12.1.2.3 switch=yes enabled=true
-new line.cf4 phases=3 bus1=32.1.2.3 bus2=42.1.2.3 switch=yes enabled=true
 new line.12_22 phases=3 bus1=12.1.2.3 bus2=22.1.2.3 length=3 linecode=arranjo
 new line.22_32 phases=3 bus1=22.1.2.3 bus2=32.1.2.3 length=3 linecode=arranjo
 new line.42_52 phases=3 bus1=42.1.2.3 bus2=52.1.2.3 length=3 linecode=arranjo
@@ -27,11 +22,20 @@ new line.52_62 phases=3 bus1=52.1.2.3 bus2=62.1.2.3 length=3 linecode=arranjo
 new line.62_72 phases=3 bus1=62.1.2.3 bus2=72.1.2.3 length=3 linecode=arranjo
 new line.72_82 phases=3 bus1=72.1.2.3 bus2=82.1.2.3 length=3 linecode=arranjo
 
+!chaves
+new line.dj1 phases=3 bus1=MT.1.2.3 bus2=10.1.2.3 switch=yes enabled=true
+new line.cf1 phases=3 bus1=30.1.2.3 bus2=40.1.2.3 switch=yes enabled=true
+new line.cf2 phases=3 bus1=60.1.2.3 bus2=70.1.2.3 switch=yes enabled=true
+new line.dj2 phases=3 bus1=MT.1.2.3 bus2=11.1.2.3 switch=yes enabled=true
+new line.cf3 phases=3 bus1=31.1.2.3 bus2=41.1.2.3 switch=yes enabled=true
+new line.dj3 phases=3 bus1=MT.1.2.3 bus2=12.1.2.3 switch=yes enabled=true
+new line.cf4 phases=3 bus1=32.1.2.3 bus2=42.1.2.3 switch=yes enabled=true
 new line.cf5 phases=3 bus1=40.1.2.3 bus2=42.1.2.3 switch=yes enabled=false
 new line.cf6 phases=3 bus1=80.1.2.3 bus2=82.1.2.3 switch=yes enabled=false
 new line.cf7 phases=3 bus1=40.1.2.3 bus2=41.1.2.3 switch=yes enabled=false
 new line.cf8 phases=3 bus1=80.1.2.3 bus2=71.1.2.3 switch=yes enabled=false
 
+!cargas
 new load.carga_20 kv=13.8 kw=350 pf=0.9 bus1=20.1.2.3 phases=3
 new load.carga_50 kv=13.8 kw=450 pf=0.9 bus1=50.1.2.3 phases=3
 new load.carga_21 kv=13.8 kw=550 pf=0.9 bus1=21.1.2.3 phases=3
@@ -41,7 +45,7 @@ new load.carga_72 kv=13.8 kw=450 pf=0.9 bus1=72.1.2.3 phases=3
 
 set voltagebases=[13.8]
 calcv
-!Buscoords coordenadas.dss
+Buscoords coordenadas.dss
 
 !solve
 !show voltage ln nodes
