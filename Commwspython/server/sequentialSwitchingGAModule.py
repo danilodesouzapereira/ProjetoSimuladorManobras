@@ -11,11 +11,9 @@ Class to represent optimal switching Genetic Algorithm Individuals
 '''
 class IndivSS:
 	def __init__(self):
-		# self.base_graph = base_graph
-		# self.final_graph = final_graph
-		# self.SSGA_settings = SSGA_settings
 		self.switching_chromosome = []
 		self.fitness_function = 0.
+		self.list_sw_changes = []
 
 #===================================================================================#
 
@@ -49,6 +47,9 @@ class SSGA:
 		self.pc = SSGA_settings.get('pc')
 		self.pm = SSGA_settings.get('pm')
 		self.min_porc_fitness = SSGA_settings.get('min_porc_fitness')
+
+		# overall best individual
+		self.best_indiv = {'sw': None, 'fitness': 0.0}
 
 
 	'''
@@ -84,28 +85,34 @@ class SSGA:
 
 
 	''' 
-	Main method to run SSGA algorithm
+	Main method to run SSGA algorithm. It determines the best switching sequence
+	to obtain a given final graph from an initial graph.
 	'''
 	def run_ssga(self):
-		# determine opened switches and closed switches
+		# Determines opened switches and closed switches. It populates lists:
+		# self.list_closed_switches and self.list_opened_switches
 		self.determine_necessary_switchings()
 
-		# generate initial individuals, along with their GA chromosomes
+		# generates initial population of SSGA individuals
 		self.initialize_individuals()
 
 		# computes fitness function for each individual
-		best_indiv_dict = self.evaluate_individuals()
+		best_indiv = self.evaluate_individuals()
+
+		# renew overall best individual
+		if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
+			self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
 
 		# iterates over generations
 		for i in range(self.num_generations):
 			print("   SSGA generation #" + str(i+1))
 			self.mutation()
 			self.crossover()
-			best_indiv_dict_gen = self.evaluate_individuals()
+			best_indiv = self.evaluate_individuals()
 
-			#renew best individual
-			if best_indiv_dict_gen['fitness'] < best_indiv_dict['fitness']:
-				best_indiv_dict = best_indiv_dict_gen
+			# renew overall best individual
+			if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
+				self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
 
 			if self.has_convergence():
 				break
@@ -114,15 +121,16 @@ class SSGA:
 
 
 	'''
-	Method to generate initial individuals
+	Method to generate initial population of SSGA individuals. Each individual has the following parameters:
+	switching_chromosome, fitness_function, list_sw_changes
 	'''
 	def initialize_individuals(self):
-		# print("num_individuals: " + str(self.num_individuals))
 		for i in range(self.num_individuals):
-			indiv = IndivSS()
-			self.list_ga_individuals.append(indiv)
+			indiv = IndivSS() ; self.list_ga_individuals.append(indiv)
 
-			# for each edge to be closed, appends a random number from [0,1]
+			# It resorts of RANDOM KEYS strategy to encode switching sequence.
+			# For each edge to be closed, a random number from [0,1] is appended to
+			# list: "switching_chromosome"
 			for j in range(len(self.list_closed_switches)):
 				indiv.switching_chromosome.append(round(random.random(), 4))
 
@@ -252,8 +260,7 @@ class SSGA:
 	aimed to reproduce the effects of the investigated switching steps
 	'''
 	def evaluate_individuals(self):
-		#debug
-		best_indiv = {'sw':None, 'fitness':0.0}
+		best_indiv = {'sw': None, 'fitness': 0.0}
 
 		for i in reversed(range(len(self.list_ga_individuals))):
 			ssga_indiv = self.list_ga_individuals[i]
@@ -269,9 +276,13 @@ class SSGA:
 			#debug
 			# print("SSGA individual #" + str(i+1) + " - " + str(sw_seq))
 
-			# determines the codes of switches that need to be closed/opened
-			# format: list of dictionaries
+			# Determines the codes of switches that need to be closed/opened. Format: list of dictionaries.
 			sw_changes = self.compute_switching_changes(sw_seq)
+
+			# Stores switch sequence in ssga individual.
+			ssga_indiv.list_sw_changes.clear()
+			for dict_sw_change in sw_changes:
+				ssga_indiv.list_sw_changes.append(dict_sw_change)
 
 			# determines initial states of network's switches
 			dict_sw_states = self.determine_sw_initial_states()
@@ -282,12 +293,9 @@ class SSGA:
 			# attributes load flow merit index to fitness function value
 			ssga_indiv.fitness_function = LF_MI
 
-
-			#debug
+			# updates best individual
 			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness_function:
 				best_indiv['sw'] = sw_seq ; best_indiv['fitness'] = ssga_indiv.fitness_function
-
-		#debug
 		return best_indiv
 
 
@@ -398,7 +406,7 @@ class SSGA:
 		set_vertices_ini_graph = set([])
 		for edge in self.initial_edges:
 			set_vertices_ini_graph.add(edge[0]) ; set_vertices_ini_graph.add(edge[1])
-			self.initial_graph_data["edges"].append({edge[0], edge[1]})	# appends edge as set to avoid duplicity
+			self.initial_graph_data["edges"].append({edge[0], edge[1]})	# appends edge as sets, to avoid duplicity
 		self.initial_graph_data["vertices"] = list(set_vertices_ini_graph)
 		#debug
 		# linha = "\nInitial graph - " + str(self.initial_graph_data["edges"])

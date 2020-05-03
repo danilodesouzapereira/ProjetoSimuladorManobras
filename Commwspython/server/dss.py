@@ -36,7 +36,7 @@ class DSS(object):
 
 		# list "list_sw_dicts" with dictionaries containing switches information
 		for fd_info in feeders_info:
-			dict_sw = {'name':fd_info['prot_switch']}
+			dict_sw = {'name':fd_info['prot_switch'], 'currents': [0.0, 0.0, 0.0]}
 			self.list_sw_dicts.append(dict_sw)
 
 		# gets phases strings for each switch
@@ -177,7 +177,6 @@ class DSS(object):
 			# didn't find switch dictionary related with the switch
 			if i == -1:
 				iLine = DSSLines.Next
-				sw_dict.update({'currents': [0.0, 0.0, 0.0]})
 				continue
 
 			# gets sw dict

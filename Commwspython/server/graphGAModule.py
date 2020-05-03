@@ -12,6 +12,7 @@ class Indiv:
 		self.initial_edges = initial_edges
 		self.graph = graph
 		self.f_evaluation = 100.0
+		self.list_sw_changes = []
 
 #===================================================================================#
 
@@ -77,23 +78,27 @@ class GraphGA:
 																 indiv.initial_edges,
 																 self.settings_switching_ga,
 																 self.sw_assessment)
+			# runs SSGA (Sequential Switching Genetic Algorithm)
 			ssga.run_ssga()
 
-		# Debug: inserts individuals' GA assessment (fitness)
-		for indiv in self.list_ga_indiv:
-			graph = indiv.graph
-			for edge in graph.edgesKRST:
-				edge_set = {edge[0], edge[1]}
-				if edge_set == {0, 3} or edge_set == {0, 5}:
-					indiv.f_evaluation -= 1.
-				elif edge_set == {3, 4} or edge_set == {5, 6}:
-					indiv.f_evaluation -= 2.
-				elif edge_set == {1, 2}:
-					indiv.f_evaluation -= 4.
-				elif edge_set == {1, 4} or edge_set == {1, 6}:
-					indiv.f_evaluation -= 8.
-				elif edge_set == {2, 4} or edge_set == {2, 6}:
-					indiv.f_evaluation -= 15.
+			# stores fitness function of Graph GA individual based on SSGA best individual fitness
+			indiv.f_evaluation = ssga.best_indiv['fitness']
+
+		# # Debug: inserts individuals' GA assessment (fitness)
+		# for indiv in self.list_ga_indiv:
+		# 	graph = indiv.graph
+		# 	for edge in graph.edgesKRST:
+		# 		edge_set = {edge[0], edge[1]}
+		# 		if edge_set == {0, 3} or edge_set == {0, 5}:
+		# 			indiv.f_evaluation -= 1.
+		# 		elif edge_set == {3, 4} or edge_set == {5, 6}:
+		# 			indiv.f_evaluation -= 2.
+		# 		elif edge_set == {1, 2}:
+		# 			indiv.f_evaluation -= 4.
+		# 		elif edge_set == {1, 4} or edge_set == {1, 6}:
+		# 			indiv.f_evaluation -= 8.
+		# 		elif edge_set == {2, 4} or edge_set == {2, 6}:
+		# 			indiv.f_evaluation -= 15.
 		# debug
 		# linha = ""
 		# for indiv in self.list_ga_indiv:
