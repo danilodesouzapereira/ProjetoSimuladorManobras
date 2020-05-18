@@ -131,8 +131,7 @@ class GraphGA:
 			# print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")
 			indiv = self.list_ga_indiv[i]
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
-			ssga = sequentialSwitchingGAModule.SSGA(self.sm_folder,
-																 indiv.graph,
+			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
 																 indiv.initial_edges,
 																 self.settings_switching_ga,
 																 self.sw_assessment,

@@ -1,5 +1,4 @@
 import dss
-import converterGraphDSSModule
 import networksData
 
 #===================================================================================#
@@ -55,12 +54,17 @@ class AssessSSGAIndiv(object):
 	to fulfill all necessary switching operations.
 	'''
 
-	def crew_displacement_merit_index(self, sw_changes):
+	def crew_displacement_merit_index(self, st_switch, sw_changes):
 		if len(sw_changes) < 2:
 			return 0., []
 
 		list_pairs = []
 		list_displ_times = []
+
+		# 1st displacement: between start switch and sw_changes' 1st switch
+		sw_code1 = st_switch
+		sw_code2 = sw_changes[0]['code']
+		list_pairs.append([sw_code1, sw_code2])
 
 		# determine pairs of displacement
 		for i in range(len(sw_changes) - 1):
@@ -78,7 +82,7 @@ class AssessSSGAIndiv(object):
 
 		# calculate crew displacement merit index (cd_mi),
 		# based on total time and maximum allowable time (max_time_minutes)
-		max_time_minutes = 30 ; tot_time_pu = 1000.
+		max_time_minutes = 120. ; tot_time_pu = 1000.
 		if tot_time_minutes < max_time_minutes:
 			tot_time_pu = tot_time_minutes / max_time_minutes
 
@@ -86,14 +90,14 @@ class AssessSSGAIndiv(object):
 
 
 	'''
-	Method to compute reliability merit index (RT_MI), which is based on outage times
+	Method to compute outage duration merit index (OD_MI), which is based on outage times
 	among switching operations. Parameters:
 		- dict_sw_states:   dictionary with initial switch states
 		- sw_changes:       list of switching operations
 		- list_displ_times: list of crew displacement times for switching operations
 	'''
 
-	def reliability_merit_index(self, dict_sw_states, sw_changes, list_displ_times):
+	def outage_duration_merit_index(self, dict_sw_states, sw_changes, list_displ_times):
 		interr_cust = [] # list with number of interrupted customers
 		avg_tot_duration = 0.
 
@@ -131,10 +135,16 @@ class AssessSSGAIndiv(object):
 		return RT_MI
 
 	'''
-	Method to determine crew displacement time between
-	two switches: sw1, sw2
+	Method to determine crew displacement time between two switches: sw1, sw2.
+	If sw2 is automatic, displacement time is considered zero.
 	'''
 	def displacement_time(self, sw1, sw2):
+		# displacement time is zero if sw2 is automatic (circuit break or recloser)
+		for sw in self.list_switches:
+			if sw['code_sw'] == sw2:
+				if sw['type_sw'] == "disjuntor" or sw['type_sw'] == "religadora":
+					return 0.
+
 		# determine switches' index, regarding the incidence matrix
 		sw1_index, sw2_index = -1, -1
 		for sw in self.list_switches:

@@ -115,6 +115,7 @@ class NetworksData(object):
 			dict_sw = {}
 			dict_sw.update({'id_sw':sw['id']})
 			dict_sw.update({'code_sw': sw['code']})
+			dict_sw.update({'type_sw': sw['type']})
 			sw_list.append(dict_sw)
 		return sw_list
 

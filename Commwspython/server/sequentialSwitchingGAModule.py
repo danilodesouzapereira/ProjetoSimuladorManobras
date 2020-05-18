@@ -21,7 +21,7 @@ class IndivSS:
 Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
 '''
 class SSGA:
-	def __init__(self, sm_folder, graph, initial_edges, SSGA_settings, sw_assessment, networks_data):
+	def __init__(self, graph, initial_edges, SSGA_settings, sw_assessment, networks_data):
 		# all data concerning networks
 		self.networks_data = networks_data
 
@@ -48,6 +48,7 @@ class SSGA:
 		self.pc = SSGA_settings.get('pc')
 		self.pm = SSGA_settings.get('pm')
 		self.min_porc_fitness = SSGA_settings.get('min_porc_fitness')
+		self.start_switch = SSGA_settings.get('start_switch')
 
 		# overall best individual
 		self.best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0}
@@ -259,11 +260,79 @@ class SSGA:
 
 
 	'''
+	Method to compute LF_MI (Load flow merit index), based solely on initial and final states.
+	'''
+	def compute_final_state_load_flow_merit_index(self):
+		# pick one individual (the 1st one, for instante)
+		ssga_indiv = self.list_ga_individuals[0]
+
+		# determine switchings
+		sw_seq, str_details = self.complete_switching_sequence(ssga_indiv)
+		sw_changes = self.compute_switching_changes(sw_seq)
+
+		# determine initial states dictionary
+		dict_sw_states = self.determine_sw_initial_states()
+
+		# effectively assess LF_MI
+		LF_MI = self.sw_assessment.load_flow_merit_index(dict_sw_states, sw_changes)
+		return LF_MI
+
+
+	'''
+	Method to compute number of switching operations merit index (NS_MI). As results, the
+	following numbers are provided:
+		- Number of total manual switching operations;
+		- Number of total automatic switching operations;
+	'''
+	def compute_number_of_switchings_merit_index(self):
+		# pick one individual (the 1st one, for instante)
+		ssga_indiv = self.list_ga_individuals[0]
+
+		# determine switchings
+		sw_seq, str_details = self.complete_switching_sequence(ssga_indiv)
+		sw_changes = self.compute_switching_changes(sw_seq)
+
+		# determine numbers of manual and automatic swtiching operations
+		number_sw_manual = 0
+		number_sw_auto = 0
+		for change in sw_changes:
+			sw_code = change['code']
+
+			# Based on all switches register, search for switch's type.
+			sw_register = self.networks_data.get_list_switches()
+			for sw in sw_register:
+				if sw['code_sw'] != sw_code: continue
+				if sw['type_sw'] == 'disjuntor' or sw['type_sw'] == 'religadora':
+					number_sw_auto += 1
+				else:
+					number_sw_manual += 1
+				break
+
+		# compute NS_MI
+		max_sw_operations = 6
+		NS_MI = 1000.
+		k_manual, k_auto = 1.0, 1.0
+		number_sw = (k_manual * number_sw_manual + k_auto * number_sw_auto) / (k_manual + k_auto)
+
+		if number_sw < max_sw_operations:
+			NS_MI = number_sw / max_sw_operations
+
+		return NS_MI
+
+
+	'''
 	Method to compute fitness function of GA individuals. It is based on simulations
 	aimed to reproduce the effects of the investigated switching steps
 	'''
 	def evaluate_individuals(self):
 		best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0}
+
+		# Compute load flow merit index, which depends solely on initial and final states.
+		# Then, a unique load flow to assess final state loading is enough.
+		LF_MI = self.compute_final_state_load_flow_merit_index()
+
+		# Compute number of switchings merit index
+		NS_MI = self.compute_number_of_switchings_merit_index()
 
 		for i in reversed(range(len(self.list_ga_individuals))):
 			ssga_indiv = self.list_ga_individuals[i]
@@ -287,20 +356,17 @@ class SSGA:
 			for dict_sw_change in sw_changes:
 				ssga_indiv.list_sw_changes.append(dict_sw_change)
 
-			# determines initial states of network's switches
+			# determine initial states of network's switches
 			dict_sw_states = self.determine_sw_initial_states()
 
-			# compute load flow merit index
-			LF_MI = self.sw_assessment.load_flow_merit_index(dict_sw_states, sw_changes)
-
 			# compute crew displacement
-			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(sw_changes)
+			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(self.start_switch, sw_changes)
 
-			# compute reliability merit index
-			RT_MI = self.sw_assessment.reliability_merit_index(dict_sw_states, sw_changes, list_displ_times)
+			# compute outage duration merit index (power interruption during switching procedure)
+			OD_MI = self.sw_assessment.outage_duration_merit_index(dict_sw_states, sw_changes, list_displ_times)
 
 			# computes individual total merit index
-			ssga_indiv.fitness_function = self.compute_total_merit_index(LF_MI, CD_MI)
+			ssga_indiv.fitness_function = self.compute_total_merit_index(LF_MI, CD_MI, OD_MI, NS_MI)
 
 			# updates best individual
 			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness_function:
@@ -311,14 +377,18 @@ class SSGA:
 
 	'''
 	Method to compute individual total merit index, which is calcalated
-	based on different speciffic merit indexes
+	based on different speciffic merit indexes. Parameters:
+		LF_MI: load flow merit index
+		CD_MI: crew displacement merit index
+		OD_MI: outage duration merit index
+		NS_MI: number of switching operations merit index
 	'''
-	def compute_total_merit_index(self, LF_MI, CD_MI):
+	def compute_total_merit_index(self, LF_MI, CD_MI, OD_MI, NS_MI):
 		# speciffic weights
-		k_LF = 1.0 ; k_CD = 1.0
+		k_LF = 1.0 ; k_CD = 1.0; k_OD = 1.0; k_NS = 1.0
 
-		# final composition
-		total_mi = k_LF * LF_MI + k_CD * CD_MI
+		# composition of overall merit index value
+		total_mi = k_LF * LF_MI + k_CD * CD_MI + k_OD * OD_MI + k_NS * NS_MI
 
 		return total_mi
 
