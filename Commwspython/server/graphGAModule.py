@@ -22,8 +22,11 @@ class Indiv:
 Class to represent GA applied to graphs 
 '''
 class GraphGA:
-	def __init__(self, sm_folder, settings_graph_ga, settings_switching_ga, sw_assessment, networks_data):
+	def __init__(self, sm_folder, settings_graph_ga, settings_switching_ga, sw_assessment, networks_data, merit_index_conf):
 		self.sm_folder = sm_folder
+
+		# configurations concerning merit index calculation
+		self.merit_index_conf = merit_index_conf
 
 		# data concerning the power networks investigated
 		self.networks_data = networks_data
@@ -135,7 +138,8 @@ class GraphGA:
 																 indiv.initial_edges,
 																 self.settings_switching_ga,
 																 self.sw_assessment,
-																 self.networks_data)
+																 self.networks_data,
+																 self.merit_index_conf)
 			# runs SSGA (Sequential Switching Genetic Algorithm)
 			ssga.run_ssga()
 

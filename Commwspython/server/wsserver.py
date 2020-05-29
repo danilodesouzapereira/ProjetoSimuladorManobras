@@ -20,7 +20,7 @@ dados_simulacao = None
 '''
 @app.route('/novasimulacao', methods=['POST'])
 def nova_simulacao():
-	dados_simulacao = request.get_json() # pega os dados das arestas
+	dados_simulacao = request.get_json()
 	simulador = simuladorManobras.SM(dados_simulacao)
 	simulador.run_simulator()
 	simulador.return_response()

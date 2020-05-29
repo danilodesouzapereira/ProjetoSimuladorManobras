@@ -20,6 +20,9 @@ class SM(object):
 		self.settings_graph_GA = self.get_GGA_settings()      # settings of Graph Genetic Algorithm
 		self.settings_switching_GA = self.get_SSGA_settings() # settings of Seq. Switching Genetic Algorithm
 
+		# get configurations concerning merit index calculation
+		self.merit_index_conf = self.dados_simulacao['av_conf_indice_merito']
+
 		# object with all networks' data
 		self.networks_data = networksData.NetworksData(self.sm_folder)
 		self.networks_data.initialize()
@@ -109,7 +112,7 @@ class SM(object):
 	def run_simulator(self):
 		# Initialize graph GA object
 		gga = graphGAModule.GraphGA(self.sm_folder, self.settings_graph_GA, self.settings_switching_GA,
-		                            self.sw_assessment, self.networks_data)
+		                            self.sw_assessment, self.networks_data, self.merit_index_conf)
 		
 		# Runs GA
 		gga.run_gga()

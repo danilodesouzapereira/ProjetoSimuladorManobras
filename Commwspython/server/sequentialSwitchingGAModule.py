@@ -21,9 +21,12 @@ class IndivSS:
 Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
 '''
 class SSGA:
-	def __init__(self, graph, initial_edges, SSGA_settings, sw_assessment, networks_data):
+	def __init__(self, graph, initial_edges, SSGA_settings, sw_assessment, networks_data, merit_index_conf):
 		# all data concerning networks
 		self.networks_data = networks_data
+
+		# get configurations concerning merit index calculation
+		self.merit_index_conf = merit_index_conf
 
 		# graph data
 		list_switches = self.networks_data.get_list_switches()
@@ -377,15 +380,18 @@ class SSGA:
 
 	'''
 	Method to compute individual total merit index, which is calcalated
-	based on different speciffic merit indexes. Parameters:
+	based on different specific merit indexes. Parameters:
 		LF_MI: load flow merit index
 		CD_MI: crew displacement merit index
 		OD_MI: outage duration merit index
 		NS_MI: number of switching operations merit index
 	'''
 	def compute_total_merit_index(self, LF_MI, CD_MI, OD_MI, NS_MI):
-		# speciffic weights
-		k_LF = 1.0 ; k_CD = 1.0; k_OD = 1.0; k_NS = 1.0
+		# specific weighting coefficients
+		k_LF = self.merit_index_conf['k_load_flow']
+		k_CD = self.merit_index_conf['k_crew_displacement']
+		k_OD = self.merit_index_conf['k_outage_duration']
+		k_NS = self.merit_index_conf['k_number_switching']
 
 		# composition of overall merit index value
 		total_mi = k_LF * LF_MI + k_CD * CD_MI + k_OD * OD_MI + k_NS * NS_MI
