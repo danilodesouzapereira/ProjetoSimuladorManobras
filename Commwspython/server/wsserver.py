@@ -20,10 +20,14 @@ dados_simulacao = None
 '''
 @app.route('/novasimulacao', methods=['POST'])
 def nova_simulacao():
-	dados_simulacao = request.get_json()
+
+	body_request = request.get_json()
+	dados_simulacao = body_request['dados_simulacao']	
 	simulador = simuladorManobras.SM(dados_simulacao)
-	simulador.run_simulator()
+	#simulador.run_simulator()
 	simulador.return_response()
+	
+	print("Retorno enviado com sucesso!")
 
 	return jsonify({}), 200
 

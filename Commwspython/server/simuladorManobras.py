@@ -80,17 +80,22 @@ class SM(object):
 	
 
 	def return_response(self):
-		list_actions = [] ; acao : str
-		for dict_action in self.dict_results['actions']:
-			sw_code = dict_action['code'] ; action = dict_action['action']
-			if action == 'cl': acao = 'fechar'
-			else: acao = 'abrir'
-			list_actions.append({'chave':sw_code, 'acao':acao})
-		return_data = {'chaveamentos':list_actions}
+		#list_actions = [] ; acao : str
+		#for dict_action in self.dict_results['actions']:
+		#	sw_code = dict_action['code'] ; action = dict_action['action']
+		#	if action == 'cl': acao = 'fechar'
+		#	else: acao = 'abrir'
+		#	list_actions.append({'chave':sw_code, 'acao':acao})
+		#return_data = {'chaveamentos':list_actions}
+		#
+		#print("Fitness: " + str(self.dict_results['Fitness']))
+		#
+		#r = requests.post('http://127.0.0.1:5011/retornosimulacao', json=return_data)
 		
-		print("Fitness: " + str(self.dict_results['Fitness']))
 		
-		r = requests.post('http://127.0.0.1:5011/retornosimulacao', json=return_data)
+		#DEBUG - TESTE DO RETORNO
+		return_data = {'par1':'valor_par1', 'par2':'valor_par2'}
+		r = requests.post('http://127.0.0.1:8082/SaidaSM', json=return_data)		
 
 
 	# '''
