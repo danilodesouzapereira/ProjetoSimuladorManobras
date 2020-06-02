@@ -106,7 +106,7 @@ class GraphGA:
 
 		# Print fitness function
 		self.print_fitness_function()
-		
+				
 		# 1st stage GA generations
 		for i in range(self.num_geracoes):
 			print("=== GGA generation #" + str(i+1) + " ===")
@@ -128,29 +128,35 @@ class GraphGA:
 	'''
 	def run_gga_optimal_switching(self):
 		print("\n================ 2nd stage - SSGA =======================")
-		
-		# runs Seq. Switching GA for each individual
+				
+		# runs Seq. Switching GA for each GGA individual
 		for i in range(len(self.list_ga_indiv)):
-			# print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")
+		
+			print("\nIndividuo GGA: " + str(i) + " de " + str(len(self.list_ga_indiv)))
+		
+			# print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")			
 			indiv = self.list_ga_indiv[i]
+						
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
 			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
-																 indiv.initial_edges,
-																 self.settings_switching_ga,
-																 self.sw_assessment,
-																 self.networks_data,
-																 self.merit_index_conf)
+													 indiv.initial_edges,
+													 self.settings_switching_ga,
+													 self.sw_assessment,
+													 self.networks_data,
+													 self.merit_index_conf)
+						
 			# runs SSGA (Sequential Switching Genetic Algorithm)
 			ssga.run_ssga()
-
+						
 			# stores fitness function of Graph GA individual based on SSGA best individual fitness
 			indiv.f_evaluation = ssga.best_indiv['fitness']
 			indiv.list_sw_changes = ssga.best_indiv['sw']
 			indiv.list_sw_changes_codes = ssga.best_indiv['sw_codes']
-			
+									
 			# renew Graphic GA best individual
 			if self.best_indiv is None or indiv.f_evaluation < self.best_indiv.f_evaluation:
 				self.best_indiv = indiv
+
 
 	
 	''' 

@@ -110,12 +110,12 @@ class SSGA:
 			self.best_indiv['sw_codes'] = best_indiv['sw_codes']
 
 		# iterates over generations
-		for i in range(self.num_generations):
+		for i in range(self.num_generations):		
 			# print("   SSGA generation #" + str(i+1))
 			self.mutation()
-			self.crossover()
+			self.crossover()		
 			best_indiv = self.evaluate_individuals()
-
+			
 			# renew overall best individual
 			if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 				self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
@@ -123,8 +123,6 @@ class SSGA:
 				
 			if self.has_convergence():
 				break
-		#debug
-		a=0
 
 
 	'''
@@ -388,10 +386,10 @@ class SSGA:
 	'''
 	def compute_total_merit_index(self, LF_MI, CD_MI, OD_MI, NS_MI):
 		# specific weighting coefficients
-		k_LF = self.merit_index_conf['k_load_flow']
-		k_CD = self.merit_index_conf['k_crew_displacement']
-		k_OD = self.merit_index_conf['k_outage_duration']
-		k_NS = self.merit_index_conf['k_number_switching']
+		k_LF = float(self.merit_index_conf['k_load_flow'].replace(',','.'))
+		k_CD = float(self.merit_index_conf['k_crew_displacement'].replace(',','.'))
+		k_OD = float(self.merit_index_conf['k_outage_duration'].replace(',','.'))
+		k_NS = float(self.merit_index_conf['k_number_switching'].replace(',','.'))
 
 		# composition of overall merit index value
 		total_mi = k_LF * LF_MI + k_CD * CD_MI + k_OD * OD_MI + k_NS * NS_MI

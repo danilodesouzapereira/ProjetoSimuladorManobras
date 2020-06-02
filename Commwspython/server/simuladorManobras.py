@@ -2,6 +2,7 @@ import graphGAModule
 import switchingAssessmentModule
 import requests
 import networksData
+import time
 
 # ===================================================================================#
 '''
@@ -40,10 +41,11 @@ class SM(object):
 	def get_GGA_settings(self):
 		settings_graph_GA = {}
 		dict_conf = self.dados_simulacao['conf_ag_grafo']
-		settings_graph_GA.update({'num_generations':dict_conf['num_geracoes']})
-		settings_graph_GA.update({'num_individuals': dict_conf['num_individuos']})
-		settings_graph_GA.update({'pc': dict_conf['pc']})
-		settings_graph_GA.update({'pm': dict_conf['pm']})
+		settings_graph_GA.update({'num_generations': int(dict_conf['num_geracoes'])})
+		settings_graph_GA.update({'num_individuals': int(dict_conf['num_individuos'])})
+		settings_graph_GA.update({'pc': float(dict_conf['pc'].replace(',','.'))})
+		settings_graph_GA.update({'pm': float(dict_conf['pm'].replace(',','.'))})
+		
 		return settings_graph_GA
 
 
@@ -53,11 +55,11 @@ class SM(object):
 	def get_SSGA_settings(self):
 		settings_graph_GA = {}
 		dict_conf = self.dados_simulacao['conf_ag_chv_otimo']
-		settings_graph_GA.update({'num_generations':dict_conf['num_geracoes']})
-		settings_graph_GA.update({'num_individuals': dict_conf['num_individuos']})
-		settings_graph_GA.update({'pc': dict_conf['pc']})
-		settings_graph_GA.update({'pm': dict_conf['pm']})
-		settings_graph_GA.update({'min_porc_fitness': dict_conf['min_porc_fitness']})
+		settings_graph_GA.update({'num_generations': int(dict_conf['num_geracoes'])})
+		settings_graph_GA.update({'num_individuals': int(dict_conf['num_individuos'])})
+		settings_graph_GA.update({'pc': float(dict_conf['pc'].replace(',','.'))})
+		settings_graph_GA.update({'pm': float(dict_conf['pm'].replace(',','.'))})
+		settings_graph_GA.update({'min_porc_fitness': float(dict_conf['min_porc_fitness'].replace(',','.'))})
 		settings_graph_GA.update({'start_switch': self.dados_simulacao['chave_partida']})
 		return settings_graph_GA
 
@@ -80,22 +82,19 @@ class SM(object):
 	
 
 	def return_response(self):
-		#list_actions = [] ; acao : str
-		#for dict_action in self.dict_results['actions']:
-		#	sw_code = dict_action['code'] ; action = dict_action['action']
-		#	if action == 'cl': acao = 'fechar'
-		#	else: acao = 'abrir'
-		#	list_actions.append({'chave':sw_code, 'acao':acao})
-		#return_data = {'chaveamentos':list_actions}
-		#
-		#print("Fitness: " + str(self.dict_results['Fitness']))
-		#
+		list_actions = [] ; acao : str
+		for dict_action in self.dict_results['actions']:
+			sw_code = dict_action['code'] ; action = dict_action['action']
+			if action == 'cl': acao = 'fechar'
+			else: acao = 'abrir'
+			list_actions.append({'chave':sw_code, 'acao':acao})
+		return_data = {'chaveamentos':list_actions}
+		
+		print("Fitness: " + str(self.dict_results['Fitness']))
+		
 		#r = requests.post('http://127.0.0.1:5011/retornosimulacao', json=return_data)
-		
-		
-		#DEBUG - TESTE DO RETORNO
-		return_data = {'par1':'valor_par1', 'par2':'valor_par2'}
-		r = requests.post('http://127.0.0.1:8082/SaidaSM', json=return_data)		
+		url_local = 'http://localhost:8082/datasnap/rest/TServerMethods1/SaidaSM/'
+		r = requests.get(url_local + str(return_data))		
 
 
 	# '''
@@ -119,8 +118,17 @@ class SM(object):
 		gga = graphGAModule.GraphGA(self.sm_folder, self.settings_graph_GA, self.settings_switching_GA,
 		                            self.sw_assessment, self.networks_data, self.merit_index_conf)
 		
+			
 		# Runs GA
 		gga.run_gga()
+				
+				
+		print("\nGGA finalizado")
 		
 		# Obtains results
 		self.dict_results = gga.get_results()
+		
+		print("\nDict de resultados:\n")
+		print(self.dict_results)
+		
+		time.sleep(5)
