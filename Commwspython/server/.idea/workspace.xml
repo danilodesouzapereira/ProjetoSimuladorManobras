@@ -1,225 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/graphGAModule.py" line="139" mnemonic="3" />
-    <bookmark url="file://$PROJECT_DIR$/graphGAModule.py" line="31" mnemonic="2" />
-    <bookmark url="file://$PROJECT_DIR$/simuladorManobras.py" line="113" mnemonic="1" />
-    <bookmark url="file://$PROJECT_DIR$/sequentialSwitchingGAModule.py" line="28" mnemonic="4" />
-    <bookmark url="file://$PROJECT_DIR$/sequentialSwitchingGAModule.py" line="393" mnemonic="5" />
-  </component>
   <component name="ChangeListManager">
-    <list default="true" id="665b5aac-fb0e-40e8-b52e-940df52731cb" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/../client/wsclient.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/wsclient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphGAModule.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphGAModule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sequentialSwitchingGAModule.py" beforeDir="false" afterPath="$PROJECT_DIR$/sequentialSwitchingGAModule.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simuladorManobras.py" beforeDir="false" afterPath="$PROJECT_DIR$/simuladorManobras.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wsserver.py" beforeDir="false" afterPath="$PROJECT_DIR$/wsserver.py" afterDir="false" />
-    </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
+    <list default="true" id="cd78e9b1-a4d4-44c7-9a27-ecbd51471e51" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="dss.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dss.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="122" selection-start-line="122" selection-end-line="122" />
-              <folding>
-                <element signature="e#0#22#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="wsserver.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wsserver.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="23" column="34" selection-start-line="23" selection-start-column="34" selection-end-line="23" selection-end-column="34" />
-              <folding>
-                <element signature="e#0#41#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="simuladorManobras.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/simuladorManobras.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-264">
-              <folding>
-                <element signature="e#0#20#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="graphGAModule.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graphGAModule.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="139" selection-start-line="139" selection-end-line="139" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="sequentialSwitchingGAModule.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/sequentialSwitchingGAModule.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="181">
-              <caret line="389" column="32" selection-start-line="389" selection-start-column="32" selection-end-line="389" selection-end-column="32" />
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="switchingAssessmentModule.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/switchingAssessmentModule.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="140" selection-start-line="140" selection-end-line="140" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="networksData.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/networksData.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="56" selection-start-line="56" selection-end-line="56" />
-              <folding>
-                <element signature="e#0#34#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>matriz_incidencias</find>
-      <find>dict_IncMtx</find>
-      <find>self.lista_arestas</find>
-      <find>self.initial_edges</find>
-      <find>self.graph_descr</find>
-      <find>graph_descr</find>
-      <find>initial_edges</find>
-      <find>edges_list</find>
-      <find>self.conversorGrafoRede</find>
-      <find>read_xml_network_graph</find>
-      <find>GrafoAlimentadores.xml</find>
-      <find>pathXMLgrafo</find>
-      <find>definitions_and_settings(</find>
-      <find>definitions_and_settings</find>
-      <find>settings_graph_GA</find>
-      <find>num_individuals</find>
-      <find>dados_simulacao</find>
-      <find>dict_conf</find>
-      <find>sm_folder</find>
-      <find>list_closed_switches</find>
-      <find>determine_necessary_switchings</find>
-      <find>reliability_merit_index</find>
-      <find>settings_switching_ga</find>
-      <find>get_SSGA_settings</find>
-      <find>settings_switching_GA</find>
-      <find>get_list_edges</find>
-      <find>list_switches_dicts</find>
-      <find>list_switches</find>
-      <find>networks_data</find>
-      <find>merit_index_conf</find>
-    </findStrings>
-  </component>
-  <component name="Git.Settings">
-    <option name="PREVIOUS_COMMIT_AUTHORS">
-      <list>
-        <option value="Danilo" />
-      </list>
-    </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
-  </component>
-  <component name="IdeDocumentHistory">
-    <option name="CHANGED_PATHS">
-      <list>
-        <option value="$PROJECT_DIR$/sm_files/switchingAssessmentModule.py" />
-        <option value="$PROJECT_DIR$/graphModule.py" />
-        <option value="$PROJECT_DIR$/converterGraphDSSModule.py" />
-        <option value="$PROJECT_DIR$/dijkstraModule.py" />
-        <option value="$PROJECT_DIR$/dss.py" />
-        <option value="$PROJECT_DIR$/networksData.py" />
-        <option value="$PROJECT_DIR$/switchingAssessmentModule.py" />
-        <option value="$PROJECT_DIR$/wsserver.py" />
-        <option value="$PROJECT_DIR$/simuladorManobras.py" />
-        <option value="$PROJECT_DIR$/graphGAModule.py" />
-        <option value="$PROJECT_DIR$/sequentialSwitchingGAModule.py" />
-      </list>
-    </option>
-  </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="43" />
-    <option name="width" value="1339" />
-    <option name="height" value="754" />
-  </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <ConfirmationsSetting value="2" id="Add" />
-  </component>
-  <component name="ProjectView">
-    <navigator proportions="" version="1">
-      <foldersAlwaysOnTop value="true" />
-    </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="server" type="b2602c69:ProjectViewProjectNode" />
-              <item name="server" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
+  <component name="ProjectId" id="1cmY7wtIxuU8IZ4Q6GE6sQ9dnUT" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="false" />
+    <option name="showLibraryContents" value="true" />
+    <option name="sortByType" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Python" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
-  <component name="RunManager" selected="Python.wsserver">
-    <configuration name="simuladorManobras" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="server" />
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Debug" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -230,43 +33,22 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/simuladorManobras.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
-    <configuration name="wsserver" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="server" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wsserver.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
-    <list>
-      <item itemvalue="Python.wsserver" />
-      <item itemvalue="Python.simuladorManobras" />
-    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.wsserver" />
-        <item itemvalue="Python.simuladorManobras" />
+        <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
   <component name="StructureViewFactory">
-    <option name="AUTOSCROLL_MODE" value="false" />
     <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
   </component>
   <component name="SvnConfiguration">
@@ -274,355 +56,66 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="665b5aac-fb0e-40e8-b52e-940df52731cb" name="Default" comment="" />
-      <created>1588002156390</created>
+      <changelist id="cd78e9b1-a4d4-44c7-9a27-ecbd51471e51" name="Default Changelist" comment="" />
+      <created>1591135071983</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1588002156390</updated>
+      <updated>1591135071983</updated>
     </task>
-    <task id="LOCAL-00001" summary="Ajuste em configurações do PyCharm.">
-      <created>1588003075023</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1588003075023</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Ajuste em configurações do PyCharm.">
-      <created>1588003164415</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1588003164415</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Avanços na implementação do AG do 2o estágio.">
-      <created>1588110949559</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1588110949559</updated>
-    </task>
-    <task id="LOCAL-00004" summary="Avanços na implementação do AG do 2o estágio. Início da implementação do módulo de avaliação.">
-      <created>1588186965406</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1588186965406</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Avanços no módulo de avaliação dos indivíduos do AG de chaveamento ótimo.">
-      <created>1588511200645</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1588511200645</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Correções na avaliação dos indivíduos do SSGA.">
-      <created>1588538174016</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1588538174016</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Melhoria: classe para encapsular todos os dados externos.">
-      <created>1589472334381</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1589472334381</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Avanços na implementação do cálculo de simulação de manobras, com inserção de novos índices de mérito.">
-      <created>1589835312329</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1589835312333</updated>
-    </task>
-    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
-  <component name="TodoView">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-  </component>
-  <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="754" extended-state="6" />
-    <editor active="true" />
-    <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48538962" visible="true" weight="0.1592262" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32954547" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.43824404" side_tool="true" weight="0.3895447" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.14448053" />
-      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.3653274" weight="0.14935064" />
-      <window_info anchor="bottom" id="Python Console" order="8" weight="0.6038961" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.45238096" weight="0.10118044" />
-      <window_info id="Structure" order="1" sideWeight="0.5146104" side_tool="true" weight="0.1845238" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.32954547" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.56175596" weight="0.19224283" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-    </layout>
-    <layout-to-restore>
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.3653274" weight="0.14935064" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48538962" visible="true" weight="0.16964285" />
-      <window_info id="Structure" order="1" sideWeight="0.5146104" side_tool="true" weight="0.1845238" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32954547" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.43824404" weight="0.125" />
-      <window_info anchor="bottom" id="Python Console" order="8" weight="0.6038961" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.14448053" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.4702381" visible="true" weight="0.22727273" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.32954547" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5297619" side_tool="true" weight="0.20941558" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-    </layout-to-restore>
-  </component>
-  <component name="Vcs.Log.History.Properties">
-    <option name="COLUMN_ORDER">
-      <list>
-        <option value="0" />
-        <option value="2" />
-        <option value="3" />
-        <option value="1" />
-      </list>
-    </option>
-  </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="Ajuste em configurações do PyCharm." />
-    <MESSAGE value="Avanços na implementação do AG do 2o estágio." />
-    <MESSAGE value="Avanços na implementação do AG do 2o estágio. Início da implementação do módulo de avaliação." />
-    <MESSAGE value="Avanços no módulo de avaliação dos indivíduos do AG de chaveamento ótimo." />
-    <MESSAGE value="Correções na avaliação dos indivíduos do SSGA." />
-    <MESSAGE value="Melhoria: classe para encapsular todos os dados externos." />
-    <MESSAGE value="Avanços na implementação do cálculo de simulação de manobras, com inserção de novos índices de mérito." />
-    <option name="LAST_COMMIT_MESSAGE" value="Avanços na implementação do cálculo de simulação de manobras, com inserção de novos índices de mérito." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/sequentialSwitchingGAModule.py</url>
-          <line>334</line>
-          <option name="timeStamp" value="122" />
-        </line-breakpoint>
-      </breakpoints>
-      <breakpoints-dialog>
-        <breakpoints-dialog />
-      </breakpoints-dialog>
-      <default-breakpoints>
-        <breakpoint type="python-exception">
-          <properties notifyOnTerminate="true" exception="BaseException">
-            <option name="notifyOnTerminate" value="true" />
-          </properties>
-        </breakpoint>
-      </default-breakpoints>
-      <option name="time" value="123" />
-    </breakpoint-manager>
-  </component>
-  <component name="debuggerHistoryManager">
-    <expressions id="evaluateExpression">
-      <expression>
-        <expression-string>len(currents)</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-    </expressions>
-  </component>
-  <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/graphGAModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="21" column="11" selection-start-line="21" selection-start-column="11" selection-end-line="21" selection-end-column="11" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sequentialSwitchingGAModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="22" column="8" selection-start-line="22" selection-start-column="8" selection-end-line="22" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/switchingAssessmentModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" column="15" lean-forward="true" selection-start-line="20" selection-start-column="15" selection-end-line="20" selection-end-column="15" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2700">
-          <caret line="140" selection-start-line="140" selection-end-line="140" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simuladorManobras.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="760">
-          <caret line="38" lean-forward="true" selection-start-line="38" selection-end-line="38" />
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharmCE2018.1/system/python_stubs/-1055577769/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
-          <caret line="745" column="8" selection-start-line="745" selection-start-column="8" selection-end-line="745" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python37/Lib/random.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="221" selection-start-line="221" selection-end-line="221" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sm_files/switchingAssessmentModule.py" />
-    <entry file="file://$PROJECT_DIR$/graphModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5124">
-          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
-          <folding>
-            <element signature="e#169#182#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python37/Lib/xml/etree/ElementPath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="311" column="4" selection-start-line="311" selection-start-column="4" selection-end-line="311" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dijkstraModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="93" column="6" selection-start-line="93" selection-start-column="6" selection-end-line="93" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python37/Lib/xml/etree/ElementTree.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="96">
-          <caret line="586" selection-start-line="586" selection-end-line="586" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/converterGraphDSSModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="7" column="10" lean-forward="true" selection-start-line="7" selection-start-column="10" selection-end-line="7" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python37/Lib/site-packages/flask/app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="786">
-          <caret line="1939" column="69" lean-forward="true" selection-start-line="1939" selection-start-column="69" selection-end-line="1939" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dss.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="122" selection-start-line="122" selection-end-line="122" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/networksData.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="56" selection-start-line="56" selection-end-line="56" />
-          <folding>
-            <element signature="e#0#34#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wsserver.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="23" column="34" selection-start-line="23" selection-start-column="34" selection-end-line="23" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#41#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/switchingAssessmentModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="140" selection-start-line="140" selection-end-line="140" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simuladorManobras.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-264">
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/graphGAModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="139" selection-start-line="139" selection-end-line="139" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sequentialSwitchingGAModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="181">
-          <caret line="389" column="32" selection-start-line="389" selection-start-column="32" selection-end-line="389" selection-end-column="32" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+  <component name="WindowStateProjectService">
+    <state x="752" y="330" key="#Scopes" timestamp="1591135209081">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state x="752" y="330" key="#Scopes/0.0.1920.944@0.0.1920.944" timestamp="1591135209081" />
+    <state width="1472" height="466" key="DebuggerActiveHint" timestamp="1591456183500">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1472" height="466" key="DebuggerActiveHint/0.0.1920.944@0.0.1920.944" timestamp="1591456183500" />
+    <state width="1899" height="241" key="GridCell.Tab.0.bottom" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.0.bottom/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.0.center" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.0.center/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.0.left" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.0.left/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.0.right" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.0.right/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.1.bottom" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.1.bottom/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.1.center" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.1.center/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.1.left" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.1.left/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state width="1899" height="241" key="GridCell.Tab.1.right" timestamp="1591470808523">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state width="1899" height="241" key="GridCell.Tab.1.right/0.0.1920.944@0.0.1920.944" timestamp="1591470808523" />
+    <state x="461" y="117" key="SettingsEditor" timestamp="1591279988051">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state x="461" y="117" key="SettingsEditor/0.0.1920.944@0.0.1920.944" timestamp="1591279988051" />
+    <state x="744" y="342" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1591456228505">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state x="744" y="342" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1920.944@0.0.1920.944" timestamp="1591456228505" />
+    <state x="667" y="71" width="585" height="801" key="find.popup" timestamp="1591465967751">
+      <screen x="0" y="0" width="1920" height="944" />
+    </state>
+    <state x="667" y="71" width="585" height="801" key="find.popup/0.0.1920.944@0.0.1920.944" timestamp="1591465967751" />
   </component>
 </project>

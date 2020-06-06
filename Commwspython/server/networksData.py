@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-import dijkstraModule
 
 
 '''
@@ -19,9 +18,8 @@ class NetworksData(object):
 		# initializations
 		self.list_feeders_dicts = []
 		self.list_switches_dicts = []
+		self.list_vertices_dicts = []
 		self.list_graph_operable_switches_dicts = []
-		self.list_graph_incidence_matrix = []
-		self.crew_displ_times_mtx = [] # matrix of crew displacement times
 
 
 	def initialize(self):
@@ -30,24 +28,14 @@ class NetworksData(object):
 
 		self.read_feeders_registration(root_node)
 		self.read_switches_registration(root_node)
+		self.read_nodes_registration(root_node)
 		self.read_graph_operable_switches(root_node)
-		self.read_graph_incidence_matrix(root_node)
 
-		# compute crew displacement times, using Dijkstra's algorithm,
-		# which is based on shortest path determination
-		self.compute_crew_displacement_times()
 
 
 	'''
-	Method to compute crew displacement times among switches, based on
-	networks' incidence matrix.
+	Method to read all registration regarding power feeders
 	'''
-	def compute_crew_displacement_times(self):
-		inc_mtx = self.list_graph_incidence_matrix
-		self.crew_displ_times_mtx = dijkstraModule.run_dijkstra(inc_mtx)
-		a = 0
-
-
 	def read_feeders_registration(self, root_node):
 		node_feeders_registration = root_node.find('CadastroAlimentadores')
 		for XMLnode in node_feeders_registration:
@@ -58,6 +46,9 @@ class NetworksData(object):
 			self.list_feeders_dicts.append(dict_fd)
 
 
+	'''
+	Method to read all registration regarding switches
+	'''
 	def read_switches_registration(self, root_node):
 		node_switches_registration = root_node.find('CadastroChaves')
 		for XMLnode in node_switches_registration:
@@ -65,7 +56,21 @@ class NetworksData(object):
 			dict_sw.update({'id': int(XMLnode.find('Id').text)})
 			dict_sw.update({'code': XMLnode.find('Codigo').text})
 			dict_sw.update({'type': XMLnode.find('Tipo').text})
+			dict_sw.update({'coord_x_m': int(XMLnode.find('CoordXmetros').text)})
+			dict_sw.update({'coord_y_m': int(XMLnode.find('CoordYmetros').text)})
 			self.list_switches_dicts.append(dict_sw)
+
+
+	'''
+	Method to read all registration regarding nodes and their customers
+	'''
+	def read_nodes_registration(self, root_node):
+		node_node_registration = root_node.find('CadastroNos')
+		for XMLnode in node_node_registration:
+			dict_node = {} # dict
+			dict_node.update({'id': int(XMLnode.find('Id').text)})
+			dict_node.update({'customers': int(XMLnode.find('Clientes').text)})
+			self.list_vertices_dicts.append(dict_node)
 
 
 	'''
@@ -84,25 +89,38 @@ class NetworksData(object):
 
 
 	'''
-	Method to read incidence matrix concerning the entire networks. This matrix
-	is aimed at determining shortest paths between two given switches.
+	Method to provide all available edges and all initially closed edges
 	'''
-	def read_graph_incidence_matrix(self, root_node):
-		node_graph_complete_network = root_node.find('GrafoRedeCompleta')
-		node_incidence_matrix = node_graph_complete_network.find('MatrizIncidencias')
+	def all_edges(self):
+		all_available_edges = []
+		all_init_closed_edges = []
+		for dict_edge in self.list_graph_operable_switches_dicts:
+			all_available_edges.append(dict_edge)
+			if dict_edge['initial']:
+				all_init_closed_edges.append(dict_edge)
+		return all_available_edges, all_init_closed_edges
 
-		list_elements = node_incidence_matrix.findall('Linha')
 
-		# navigates over matrix lines, which have sintax: "3,1,2,3,5,3,2"
-		for element in list_elements:
-			matrix_line = element.text + ","
-			list_mtx_items = [] ; pos = 0
-			for i in range(len(matrix_line)):
-				if matrix_line[i:i+1] == ",":
-					list_mtx_items.append(float(matrix_line[pos:i]))
-					pos = i+1
-			# appends matrix line into final list of lines
-			self.list_graph_incidence_matrix.append(list_mtx_items)
+	# '''
+	# Method to read incidence matrix concerning the entire networks. This matrix
+	# is aimed at determining shortest paths between two given switches.
+	# '''
+	# def read_graph_incidence_matrix(self, root_node):
+	# 	node_graph_complete_network = root_node.find('GrafoRedeCompleta')
+	# 	node_incidence_matrix = node_graph_complete_network.find('MatrizIncidencias')
+	#
+	# 	list_elements = node_incidence_matrix.findall('Linha')
+	#
+	# 	# navigates over matrix lines, which have sintax: "3,1,2,3,5,3,2"
+	# 	for element in list_elements:
+	# 		matrix_line = element.text + ","
+	# 		list_mtx_items = [] ; pos = 0
+	# 		for i in range(len(matrix_line)):
+	# 			if matrix_line[i:i+1] == ",":
+	# 				list_mtx_items.append(float(matrix_line[pos:i]))
+	# 				pos = i+1
+	# 		# appends matrix line into final list of lines
+	# 		self.list_graph_incidence_matrix.append(list_mtx_items)
 
 
 

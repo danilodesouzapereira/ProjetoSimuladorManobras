@@ -49,7 +49,48 @@ class Graph:
 		nx.draw(g, with_labels=True)
 		plt.draw()
 		plt.show()
-	
+
+
+	'''
+	Method to return vertices which are disconnected to vertice 0
+	'''
+	def isolated_vertices(self):
+
+		# Assess initially isolated vertices. There is no edge connecting them.
+		isol_vertices_1 = set(range(self.V))
+		for edge in self.graph:
+			if edge[0] in isol_vertices_1:
+				isol_vertices_1.remove(edge[0])
+			if edge[1] in isol_vertices_1:
+				isol_vertices_1.remove(edge[1])
+
+		# Assess initially connected vertices.
+		edges_list = self.graph.copy()
+		repeat = True
+		find_vertice_set = {0}
+		while repeat:
+			repeat = False
+			for i in reversed(range(len(edges_list))):
+				edge = edges_list[i]
+				if edge[0] in find_vertice_set or edge[1] in find_vertice_set:
+					find_vertice_set.add(edge[0])
+					find_vertice_set.add(edge[1])
+					edges_list.remove(edge)
+					repeat = True
+
+		# fill list of isolated vertices based on remaining edges
+		isol_vertices_2 = set()
+		if len(edges_list) > 0:
+			for edge in edges_list:
+				isol_vertices_2.add(edge[0])
+				isol_vertices_2.add(edge[1])
+
+		# determine the list of all isolated vertices
+		list_isolated_vertices = list(isol_vertices_1.union(isol_vertices_2))
+
+		return list_isolated_vertices
+
+
 		
 	''' 
 	Function that does union of two sets of x and y (uses union by rank) 

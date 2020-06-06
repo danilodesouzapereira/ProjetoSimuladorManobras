@@ -117,11 +117,9 @@ class SM(object):
 		# Initialize graph GA object
 		gga = graphGAModule.GraphGA(self.sm_folder, self.settings_graph_GA, self.settings_switching_GA,
 		                            self.sw_assessment, self.networks_data, self.merit_index_conf)
-		
 			
 		# Runs GA
 		gga.run_gga()
-				
 				
 		print("\nGGA finalizado")
 		

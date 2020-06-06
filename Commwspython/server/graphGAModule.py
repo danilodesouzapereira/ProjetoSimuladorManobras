@@ -13,6 +13,7 @@ class Indiv:
 		self.initial_edges = initial_edges
 		self.graph = graph
 		self.f_evaluation = 0.0
+		self.f_evaluation_components = {}
 		self.list_sw_changes = []
 		self.list_sw_changes_codes = []
 
@@ -61,18 +62,26 @@ class GraphGA:
 	def print_fitness_function(self):
 		# debug - get all fitness functions
 		list_fitness = []
+		list_fitness_components = []
+		list_sw_operations = []
 		for indiv in self.list_ga_indiv:
 			f_aval = indiv.f_evaluation
 			list_fitness.append(round(f_aval,6))
+			list_fitness_components.append(indiv.f_evaluation_components)
+			list_sw_operations.append(indiv.list_sw_changes_codes)
+
 		list_fitness.sort()
 
 		best_fitness = list_fitness[0]
 		avg_fitness = np.average(list_fitness)
 
-		fitness_functions = ""
-		for fitness in list_fitness:
-			fitness_functions += str(fitness) + " "
-		print("Fitness functions: " + fitness_functions)
+		print("Fitness functions:")
+		for i in range(len(list_fitness)):
+			fitness = list_fitness[i]
+			fitness_comp = list_fitness_components[i]
+			operations = list_sw_operations[i]
+
+			print("fitness: " + str(round(fitness, 5)) + " (" + str(fitness_comp) + ") " + str(operations))
 		print("Avg: " + str(round(avg_fitness, 6)) + " Best: " + str(round(best_fitness, 6)))
 
 	'''
@@ -123,35 +132,36 @@ class GraphGA:
 
 
 	''' 
-	Runs GA 2nd stage, which consists of determining an
+	Run GA 2nd stage, which consists of determining an
 	optimal switching sequence for a given alternative
 	'''
 	def run_gga_optimal_switching(self):
 		print("\n================ 2nd stage - SSGA =======================")
 				
-		# runs Seq. Switching GA for each GGA individual
+		# LIST OF GGA INDIVIDUALS:
 		for i in range(len(self.list_ga_indiv)):
 		
-			print("\nIndividuo GGA: " + str(i) + " de " + str(len(self.list_ga_indiv)))
+			# print("\nIndividuo GGA: " + str(i+1) + " de " + str(len(self.list_ga_indiv)))
 		
 			# print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")			
 			indiv = self.list_ga_indiv[i]
 						
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
 			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
-													 indiv.initial_edges,
-													 self.settings_switching_ga,
-													 self.sw_assessment,
-													 self.networks_data,
-													 self.merit_index_conf)
+																indiv.initial_edges,
+																self.settings_switching_ga,
+																self.sw_assessment,
+																self.networks_data,
+																self.merit_index_conf)
 						
-			# runs SSGA (Sequential Switching Genetic Algorithm)
+			# run SSGA (Sequential Switching Genetic Algorithm)
 			ssga.run_ssga()
 						
-			# stores fitness function of Graph GA individual based on SSGA best individual fitness
+			# store fitness function of Graph GA individual based on SSGA best individual fitness
 			indiv.f_evaluation = ssga.best_indiv['fitness']
 			indiv.list_sw_changes = ssga.best_indiv['sw']
 			indiv.list_sw_changes_codes = ssga.best_indiv['sw_codes']
+			indiv.f_evaluation_components = ssga.best_indiv['fitness_components']
 									
 			# renew Graphic GA best individual
 			if self.best_indiv is None or indiv.f_evaluation < self.best_indiv.f_evaluation:
@@ -231,9 +241,11 @@ class GraphGA:
 			graph.KruskalRST()                            # generate initial radial graph
 			indiv = Indiv(graph, self.initial_edges)
 			self.list_ga_indiv.append(indiv)              # stores individual in list
-		# #debug
-		# for indiv in self.list_ga_indiv:
-		# 	print(indiv.graph.edgesKRST)
+
+		#debug
+		for indiv in self.list_ga_indiv:
+			isol_vert = indiv.graph.isolated_vertices()
+			a = 0
 
 			
 	''' 

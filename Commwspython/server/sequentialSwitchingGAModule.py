@@ -13,6 +13,7 @@ class IndivSS:
 	def __init__(self):
 		self.switching_chromosome = []
 		self.fitness_function = 0.
+		self.fitness_function_components = {}
 		self.list_sw_changes = []
 
 #===================================================================================#
@@ -51,10 +52,10 @@ class SSGA:
 		self.pc = SSGA_settings.get('pc')
 		self.pm = SSGA_settings.get('pm')
 		self.min_porc_fitness = SSGA_settings.get('min_porc_fitness')
-		self.start_switch = SSGA_settings.get('start_switch')
+		self.start_switch = SSGA_settings.get('start_switch').lower()
 
 		# overall best individual
-		self.best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0}
+		self.best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0, 'fitness_components': {}}
 
 
 	'''
@@ -107,10 +108,11 @@ class SSGA:
 		# renew overall best individual
 		if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 			self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
+			self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 			self.best_indiv['sw_codes'] = best_indiv['sw_codes']
 
 		# iterates over generations
-		for i in range(self.num_generations):		
+		for i in range(self.num_generations):
 			# print("   SSGA generation #" + str(i+1))
 			self.mutation()
 			self.crossover()		
@@ -119,6 +121,7 @@ class SSGA:
 			# renew overall best individual
 			if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 				self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
+				self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 				self.best_indiv['sw_codes'] = best_indiv['sw_codes']
 				
 			if self.has_convergence():
@@ -145,20 +148,19 @@ class SSGA:
 	maximum and average values of fitness functions
 	'''
 	def has_convergence(self):
-		# num_indiv = len(self.list_ga_individuals)
-		# if num_indiv == 0: return False
-		# average_evaluation = 0. ; max_evaluation = 0.
-		# for indiv in self.list_ga_individuals:
-		# 	average_evaluation += indiv.fitness_function # sum fitness funct. values
-		# 	if indiv.fitness_function > max_evaluation: # updates maximum fitness function
-		# 		max_evaluation = indiv.fitness_function
-		# average_evaluation /= num_indiv
-      #
-		# # computes difference between maximum and average fitness function (percentage)
-		# if average_evaluation <= 0.: return False
-		# diff = 100. * abs(average_evaluation - max_evaluation) / average_evaluation
-		# return diff <= self.min_porc_fitness
-		return False
+		num_indiv = len(self.list_ga_individuals)
+		if num_indiv == 0: return False
+		average_evaluation = 0. ; max_evaluation = 0.
+		for indiv in self.list_ga_individuals:
+			average_evaluation += indiv.fitness_function # sum fitness funct. values
+			if indiv.fitness_function > max_evaluation: # updates maximum fitness function
+				max_evaluation = indiv.fitness_function
+		average_evaluation /= num_indiv
+
+		# compute difference between maximum and average fitness function (percentage)
+		if average_evaluation <= 0.: return False
+		diff = 100. * abs(average_evaluation - max_evaluation) / average_evaluation
+		return diff <= self.min_porc_fitness
 
 
 	'''
@@ -269,6 +271,9 @@ class SSGA:
 
 		# determine switchings
 		sw_seq, str_details = self.complete_switching_sequence(ssga_indiv)
+		if sw_seq is None:
+			return 1000.
+
 		sw_changes = self.compute_switching_changes(sw_seq)
 
 		# determine initial states dictionary
@@ -291,6 +296,9 @@ class SSGA:
 
 		# determine switchings
 		sw_seq, str_details = self.complete_switching_sequence(ssga_indiv)
+		if sw_seq is None:
+			return 1000.
+
 		sw_changes = self.compute_switching_changes(sw_seq)
 
 		# determine numbers of manual and automatic swtiching operations
@@ -310,13 +318,13 @@ class SSGA:
 				break
 
 		# compute NS_MI
-		max_sw_operations = 6
+		max_sw_operations = 30
 		NS_MI = 1000.
 		k_manual, k_auto = 1.0, 1.0
-		number_sw = (k_manual * number_sw_manual + k_auto * number_sw_auto) / (k_manual + k_auto)
-
-		if number_sw < max_sw_operations:
-			NS_MI = number_sw / max_sw_operations
+		if number_sw_manual + number_sw_auto < max_sw_operations:
+			NS_MI_manual = number_sw_manual / max_sw_operations
+			NS_MI_auto = number_sw_auto / max_sw_operations
+			NS_MI = k_manual * NS_MI_manual + k_auto * NS_MI_auto
 
 		return NS_MI
 
@@ -326,7 +334,7 @@ class SSGA:
 	aimed to reproduce the effects of the investigated switching steps
 	'''
 	def evaluate_individuals(self):
-		best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0}
+		best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0, 'fitness_components': {}}
 
 		# Compute load flow merit index, which depends solely on initial and final states.
 		# Then, a unique load flow to assess final state loading is enough.
@@ -344,10 +352,7 @@ class SSGA:
 			# in case of problems with sequencing, deletes individual
 			if sw_seq is None:
 				self.list_ga_individuals.remove(ssga_indiv)
-				# print("Problema: " + str_details)
 				del ssga_indiv ; continue
-			#debug
-			# print("SSGA individual #" + str(i+1) + " - " + str(sw_seq))
 
 			# Determines the codes of switches that need to be closed/opened. Format: list of dictionaries.
 			sw_changes = self.compute_switching_changes(sw_seq)
@@ -357,21 +362,28 @@ class SSGA:
 			for dict_sw_change in sw_changes:
 				ssga_indiv.list_sw_changes.append(dict_sw_change)
 
-			# determine initial states of network's switches
-			dict_sw_states = self.determine_sw_initial_states()
+			# # determine initial states of network's switches
+			# dict_sw_states = self.determine_sw_initial_states()
 
 			# compute crew displacement
 			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(self.start_switch, sw_changes)
 
 			# compute outage duration merit index (power interruption during switching procedure)
-			OD_MI = self.sw_assessment.outage_duration_merit_index(dict_sw_states, sw_changes, list_displ_times)
+			all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
+			vertice_dicts = self.networks_data.list_vertices_dicts
+			OD_MI = self.sw_assessment.outage_duration_merit_index(sw_changes, list_displ_times, all_available_edges, all_init_closed_edges, vertice_dicts)
 
 			# computes individual total merit index
 			ssga_indiv.fitness_function = self.compute_total_merit_index(LF_MI, CD_MI, OD_MI, NS_MI)
+			ssga_indiv.fitness_function_components.update({'LF_MI': round(LF_MI, 5)})
+			ssga_indiv.fitness_function_components.update({'CD_MI': round(CD_MI, 5)})
+			ssga_indiv.fitness_function_components.update({'OD_MI': round(OD_MI, 5)})
+			ssga_indiv.fitness_function_components.update({'NS_MI': round(NS_MI, 5)})
 
 			# updates best individual
 			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness_function:
 				best_indiv['sw'] = sw_seq ; best_indiv['fitness'] = ssga_indiv.fitness_function
+				best_indiv['fitness_components'] = ssga_indiv.fitness_function_components
 				best_indiv['sw_codes'] = ssga_indiv.list_sw_changes
 		return best_indiv
 
@@ -532,3 +544,5 @@ class SSGA:
 		# linha = "Op: " + str(self.list_opened_switches)
 		# linha += " Cl: " + str(self.list_closed_switches)
 		# print("SWITCHINGS - " + linha)
+
+		a = 0

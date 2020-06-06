@@ -91,19 +91,19 @@ class Graph:
 		self.printSolution(dist)
 
 
-def run_dijkstra(inc_mtx):
-	num_nodes = len(inc_mtx)
-	g = Graph(num_nodes)
-
-	# insert incidence matrix (connections) between nodes (switches)
-	for i in range(num_nodes):
-		line = inc_mtx[i]
-		g.graph[i] = line
-
-	# compute dijkstras shortest path between nodes
-	dist_list = []
-	for i in range(num_nodes):
-		dist_to_node_i = g.dijkstra_line_values(i)
-		dist_list.append(dist_to_node_i)
-
-	return dist_list
+# def run_dijkstra(inc_mtx):
+# 	num_nodes = len(inc_mtx)
+# 	g = Graph(num_nodes)
+#
+# 	# insert incidence matrix (connections) between nodes (switches)
+# 	for i in range(num_nodes):
+# 		line = inc_mtx[i]
+# 		g.graph[i] = line
+#
+# 	# compute dijkstras shortest path between nodes
+# 	dist_list = []
+# 	for i in range(num_nodes):
+# 		dist_to_node_i = g.dijkstra_line_values(i)
+# 		dist_list.append(dist_to_node_i)
+#
+# 	return dist_list

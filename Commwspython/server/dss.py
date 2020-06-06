@@ -108,7 +108,6 @@ class DSS(object):
 		# compute all buses' voltages, after load flow execution
 		self.get_buses_voltages()
 
-		#debug
 		num_interr_nodes = 0
 		for bus_info in self.list_dict_buses:
 			volt_list = bus_info['volt_list']
