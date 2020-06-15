@@ -23,30 +23,29 @@ class AssessSSGAIndiv(object):
 	''' 
 	Method to assess load flow-based merit index
 	'''
-	def load_flow_merit_index(self, dict_sw_states, sw_changes):
+	def load_flow_merit_index(self, dict_sw_states, dicts_sw_changes):
 		# set initial conditions (right after fault clearing)
 		self.dss.set_initial_sw_states(dict_sw_states)
 
-		# initial load flow
+		# solve initial load flow
 		self.dss.solve_power_flow(show_results=False, plot_circuit=False)
 
 		# gets all 3-phase currents
 		list_dict_curr_initial = self.dss.get_currents_abs()
 
 		# closes or opens switches
-		self.dss.change_sw_states(sw_changes)
+		self.dss.change_sw_states(dicts_sw_changes)
 
-		# load flow after switchings
+		# solve load flow after switching operations
 		self.dss.solve_power_flow(show_results=False, plot_circuit=False)
 
-		# reverts switching
-		self.dss.restore_sw_states(sw_changes)
+		# revert switching
+		self.dss.restore_sw_states(dicts_sw_changes)
 
-		# gets all 3-phase currents. Format: [[ia_1, ib_1, ic_1] , [ia_2, ib_2, ic_2] , ... ]
+		# Get list of dictionaries with all 3-phase currents.
+		# Format: {'sw_name':sw_name, 'currents':[ia, ib, ic]}
 		list_dict_curr_final = self.dss.get_currents_abs()
 
-		# mod_curr_max = [40., 50., 50.]
-		# mod_curr_max = [25., 35., 15., 40., 15.]
 		LF_MI = self.compute_load_flow_merit_index(list_dict_curr_initial, list_dict_curr_final)
 		return LF_MI
 
@@ -57,7 +56,7 @@ class AssessSSGAIndiv(object):
 	'''
 
 	def crew_displacement_merit_index(self, st_switch, sw_changes):
-		if len(sw_changes) < 2:
+		if len(sw_changes) < 1:
 			return 0., []
 
 		list_pairs = []
@@ -195,6 +194,10 @@ class AssessSSGAIndiv(object):
 	'''
 
 	def displacement_time(self, sw1, sw2):
+
+		sw1 = sw1.replace('.', '')
+		sw2 = sw2.replace('.', '')
+
 		# displacement time is zero if sw2 is automatic (circuit breaker or recloser)
 		for sw in self.list_switches:
 			if sw['code_sw'] == sw2:
@@ -253,65 +256,54 @@ class AssessSSGAIndiv(object):
 
 	'''
 	Method to compute MI (merit index) related to load flow
+	1 - Compute loading margin of base condition (M_b) 
+	2 - Compute loading margin of final condition (M_f)
+	3 - Compute margin difference in pu (related to base case)
 	'''
 
 	def compute_load_flow_merit_index(self, list_dict_curr_initial, list_dict_curr_final):
-		# margin related to base condition (mod_curr_initial)
-		M_b = 0.0; w_b_tot = 0.0
+
+		M_b, M_f, w_b_tot, w_f_tot = 0.0, 0.0, 0.0, 0.0
+		diffs_b, diffs_f = 0.0, 0.0
 		for i in range(len(list_dict_curr_initial)):
-			currents_data = list_dict_curr_initial[i]
-			sw_name = currents_data['sw_name']
-			currents = currents_data['currents']
+			currents_data_initial = list_dict_curr_initial[i]
+			currents_data_final = list_dict_curr_final[i]
 
+			sw_name = currents_data_initial['sw_name']
+			currents_initial = currents_data_initial['currents']
+			currents_final = currents_data_final['currents']
+
+			# I_capacity: power feeder maximum allowable current
 			I_capacity = 0.
 			for cap_data in self.feeders_info:
 				if cap_data['prot_switch'] == sw_name:
-					I_capacity = cap_data['max_curr']
-					break
-			if I_capacity == 0.:
-				continue
+					I_capacity = cap_data['max_curr']; break
+			if I_capacity == 0.: continue
 
-			for ph in range(len(currents)):
-				if currents[ph] == 0.0: continue
-				diff = I_capacity - currents[ph]
+			# 1 - M_b: margin related to base condition
+			for ph in range(len(currents_initial)):
+				if currents_initial[ph] == 0.0: continue
+				diff = I_capacity - currents_initial[ph]
 				if diff >= 0.:
-					M_b += 1.0 * diff; w_b_tot += 1.0
+					diffs_b += 1.0 * diff; w_b_tot += 1.0
 				else:
-					M_b += 5.0 * diff; w_b_tot += 5.0
+					diffs_b += 5.0 * diff; w_b_tot += 5.0
+
+			# 2 - M_f: margin related to final condition
+			for ph in range(len(currents_final)):
+				if currents_final[ph] == 0.0: continue
+				diff = I_capacity - currents_final[ph]
+				if diff >= 0.:
+					diffs_f += 1.0 * diff; w_f_tot += 1.0
+				else:
+					diffs_f += 5.0 * diff; w_f_tot += 5.0
+
+		# 3 - Compute margin difference in pu (related to base case)
+		#   low dM_pu ==>  better solution
 		if w_b_tot > 0:
-			M_b /= w_b_tot
-		else:
-			M_b = 0.0
-
-		# margin related to final condition (mod_curr_final)
-		M = 0.0; w_tot = 0.0
-		for i in range(len(list_dict_curr_final)):
-			currents_data = list_dict_curr_final[i]
-			sw_name = currents_data['sw_name']
-			currents = currents_data['currents']
-
-			I_capacity = 0.
-			for cap_data in self.feeders_info:
-				if cap_data['prot_switch'] == sw_name:
-					I_capacity = cap_data['max_curr']
-					break
-			if I_capacity == 0.:
-				continue
-
-			for ph in range(len(currents)):
-				if currents[ph] == 0.0: continue
-				diff = I_capacity - currents[ph]
-				if diff >= 0.:
-					M += 1.0 * diff; w_tot += 1.0
-				else:
-					M += 5.0 * diff; w_tot += 5.0
-		if w_tot > 0:
-			M /= w_tot
-		else:
-			M = 0.0
-
-		# compute margin difference in pu (related to base case)
-		# Obs: low margin reduction means better solution
-		dM_pu = (M_b - M) / M_b
+			M_b = diffs_b / w_b_tot
+		if w_f_tot > 0:
+			M_f = diffs_f / w_f_tot
+		dM_pu = (M_b - M_f) / M_b
 
 		return dM_pu

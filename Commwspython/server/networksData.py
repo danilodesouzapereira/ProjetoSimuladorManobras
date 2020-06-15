@@ -54,7 +54,7 @@ class NetworksData(object):
 		for XMLnode in node_switches_registration:
 			dict_sw = {} # dict
 			dict_sw.update({'id': int(XMLnode.find('Id').text)})
-			dict_sw.update({'code': XMLnode.find('Codigo').text})
+			dict_sw.update({'code': XMLnode.find('Codigo').text.replace('.', '')})
 			dict_sw.update({'type': XMLnode.find('Tipo').text})
 			dict_sw.update({'coord_x_m': int(XMLnode.find('CoordXmetros').text)})
 			dict_sw.update({'coord_y_m': int(XMLnode.find('CoordYmetros').text)})
@@ -83,7 +83,7 @@ class NetworksData(object):
 			dict_edge = {} # dict
 			dict_edge.update({'v1': int(XMLnode.find('V1').text)})
 			dict_edge.update({'v2': int(XMLnode.find('V2').text)})
-			dict_edge.update({'switch': XMLnode.find('Chave').text}) # code of its corresponding switch
+			dict_edge.update({'switch': XMLnode.find('Chave').text.replace('.', '')}) # code of its corresponding switch
 			dict_edge.update({'initial': XMLnode.find('Inicial').text == "sim"}) # if it is initially closed
 			self.list_graph_operable_switches_dicts.append(dict_edge)
 
@@ -132,7 +132,7 @@ class NetworksData(object):
 		for sw in self.list_switches_dicts:
 			dict_sw = {}
 			dict_sw.update({'id_sw':sw['id']})
-			dict_sw.update({'code_sw': sw['code']})
+			dict_sw.update({'code_sw': sw['code'].replace('.', '')})
 			dict_sw.update({'type_sw': sw['type']})
 			sw_list.append(dict_sw)
 		return sw_list

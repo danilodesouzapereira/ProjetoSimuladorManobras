@@ -89,7 +89,7 @@ class GraphGA:
 	maximum and average values of fitness functions
 	'''
 
-	def has_convergence(self):
+	def converge(self):
 		num_indiv = len(self.list_ga_indiv)
 		if num_indiv == 0: return False
 		average_evaluation = 0. ; min_evaluation = -1.
@@ -127,7 +127,7 @@ class GraphGA:
 			# Print fitness function
 			self.print_fitness_function()
 
-			if self.has_convergence():
+			if self.converge():
 				break
 
 
@@ -139,7 +139,7 @@ class GraphGA:
 		print("\n================ 2nd stage - SSGA =======================")
 				
 		# LIST OF GGA INDIVIDUALS:
-		for i in range(len(self.list_ga_indiv)):
+		for i in reversed(range(len(self.list_ga_indiv))):
 		
 			# print("\nIndividuo GGA: " + str(i+1) + " de " + str(len(self.list_ga_indiv)))
 		
@@ -153,9 +153,14 @@ class GraphGA:
 																self.sw_assessment,
 																self.networks_data,
 																self.merit_index_conf)
-						
+
+			#debug
+			print("     EVALUATING GGA INDIV #" + str(i+1) + ":")
+
 			# run SSGA (Sequential Switching Genetic Algorithm)
-			ssga.run_ssga()
+			ssga_is_run = ssga.run_ssga()
+			if not ssga_is_run:
+				self.list_ga_indiv.remove(indiv); del indiv; continue
 						
 			# store fitness function of Graph GA individual based on SSGA best individual fitness
 			indiv.f_evaluation = ssga.best_indiv['fitness']
@@ -241,11 +246,6 @@ class GraphGA:
 			graph.KruskalRST()                            # generate initial radial graph
 			indiv = Indiv(graph, self.initial_edges)
 			self.list_ga_indiv.append(indiv)              # stores individual in list
-
-		#debug
-		for indiv in self.list_ga_indiv:
-			isol_vert = indiv.graph.isolated_vertices()
-			a = 0
 
 			
 	''' 
