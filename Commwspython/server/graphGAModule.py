@@ -4,10 +4,12 @@ import sequentialSwitchingGAModule
 import numpy as np
 
 
-#===================================================================================#
+# ===================================================================================#
 '''  
 Class to represent Graph GA individual
 '''
+
+
 class Indiv:
 	def __init__(self, graph, initial_edges):
 		self.initial_edges = initial_edges
@@ -15,13 +17,17 @@ class Indiv:
 		self.f_evaluation = 0.0
 		self.f_evaluation_components = {}
 		self.list_sw_changes = []
-		self.list_sw_changes_codes = []
+		self.list_sw_changes_codes = []  # items content: cl_reconn, [cl,op], [cl, op], ...
+		self.list_sw_inv_changes_codes = []  # items content: cl_reconn, [op,cl], [op, cl], ...
 
-#===================================================================================#
+
+# ===================================================================================#
 
 '''
 Class to represent GA applied to graphs 
 '''
+
+
 class GraphGA:
 	def __init__(self, sm_folder, settings_graph_ga, settings_switching_ga, sw_assessment, networks_data, merit_index_conf):
 		self.sm_folder = sm_folder
@@ -166,6 +172,7 @@ class GraphGA:
 			indiv.f_evaluation = ssga.best_indiv['fitness']
 			indiv.list_sw_changes = ssga.best_indiv['sw']
 			indiv.list_sw_changes_codes = ssga.best_indiv['sw_codes']
+			indiv.list_sw_inv_changes_codes = ssga.best_indiv['sw_inv_codes']
 			indiv.f_evaluation_components = ssga.best_indiv['fitness_components']
 									
 			# renew Graphic GA best individual
@@ -173,7 +180,6 @@ class GraphGA:
 				self.best_indiv = indiv
 
 
-	
 	''' 
 	Auxiliar function to get an individual's fitness function
 	'''

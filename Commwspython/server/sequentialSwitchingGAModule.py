@@ -1,32 +1,30 @@
+
 import random
 import itertools
 import graphModule
 import switchingAssessmentModule
 
 
-
-#===================================================================================#
 ''' 
 Class to represent optimal switching Genetic Algorithm Individuals
 '''
+
+
 class IndivSS:
 	def __init__(self):
-		self.switching_chromosome = []
-		self.switching_chromosome_simple = []
-		self.fitness_function = 0.
-		self.fitness_function_components = {}
-		self.list_sw_changes = []
-		self.sw_seq = []                   # Sintax: [[[u_cl,v_cl,w_cl],[u_op,v_op,w_op], ...]
-		self.sw_codes_dicts = []           # Sintax: [{'sw_code':[u,v,w], 'action':'op'}, ...]
-		self.dicts_sw_changes = []         # Sintax: {'code':sw_code, 'action':'op'})
-		self.dicts_sw_changes_simple = []  # Sintax: {'code': sw_code, 'action': sw_code_dict['action']}
+		self.random_keys_list = []
+		self.fitness = {'FF': 0.0, 'LF_MI': 0.0, 'CD_MI': 0.0, 'OD_MI': 0.0, 'NS_MI': 0.0}
+		self.sw_pairs_cl_op = []           # Sintax: [[[u_cl,v_cl,w_cl],[u_op,v_op,w_op], ...]
+		self.sw_dicts_pairs_cl_op = []     # Sintax: [{'sw_code':[u,v,w], 'action':'op'}, ...]
+		self.dicts_sw_changes = []         # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [cl,op], [cl,op], ...
+		self.dicts_sw_inv_changes = []     # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [op,cl], [op,cl], ...
 
-
-#===================================================================================#
 
 ''' 
 Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
 '''
+
+
 class SSGA:
 	def __init__(self, graph, initial_edges, SSGA_settings, sw_assessment, networks_data, merit_index_conf):
 		# all data concerning networks
@@ -39,7 +37,7 @@ class SSGA:
 		list_switches = self.networks_data.get_list_switches()
 
 		# fundamental parameters
-		self.sw_assessment : switchingAssessmentModule.AssessSSGAIndiv  = sw_assessment
+		self.sw_assessment : switchingAssessmentModule.AssessSSGAIndiv = sw_assessment
 		self.sw_assessment.update_list_switches(list_switches)
 		self.graph = graph
 
@@ -62,23 +60,24 @@ class SSGA:
 		self.start_switch = SSGA_settings.get('start_switch').lower()
 
 		# overall best individual
-		self.best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0, 'fitness_components': {}}
+		self.best_indiv = {'sw': None, 'sw_codes': None, 'sw_inv_codes': None, 'fitness': 0.0, 'fitness_components': {}}
 
 
 	'''
-	Method to convert a vector of random keys into an ordered list of switches
-	supposed to be closed. Ex: random_keys: [0.25, 0.15, 0.98]  ==> Sequence: 2 -> 1 -> 3
+	Method to convert a vector of random keys into an ordered list of switches supposed to be closed.
+	Ex: vector_random_keys: [0.25, 0.15, 0.98], aux_vector.sort() ==> [0.15, 0.25, 0.98], edges sequence: [1, 0, 2]
 	'''
 	def random_keys_to_edge(self, vector_random_keys, lisEXT):
-		# copies list of
-		aux_vector = []
-		for i in range(len(vector_random_keys)):
-			aux_vector.append(vector_random_keys[i])
-			aux_vector.sort() # sort elements in ascending order
+		# 1 - Copy original list of random keys
+		aux_vector = vector_random_keys.copy()
 
-		for key in aux_vector:
-			index = vector_random_keys.index(key)
-			edge = self.list_closed_switches[index]
+		# 2 - Sort random keys in ascending order
+		aux_vector.sort()
+
+		# 3 - Pick edges to be closed, according to random keys indices in
+		# original list
+		for r_key in aux_vector:
+			index = vector_random_keys.index(r_key) ; edge = self.list_closed_switches[index]
 			lisEXT.append(edge)
 
 
@@ -90,11 +89,10 @@ class SSGA:
 		for i in range(len(self.list_ga_individuals)):
 			indiv = self.list_ga_individuals[i]
 			linha = ""
-			for gene in indiv.switching_chromosome:
+			for gene in indiv.random_keys_list:
 				linha += str(gene) + " "
 			closing_switches = []
-			self.random_keys_to_edge(indiv.switching_chromosome, closing_switches)
-			# print("Indiv " + str(i) + ": " + linha + " " + str(closing_switches))
+			self.random_keys_to_edge(indiv.random_keys_list, closing_switches)
 
 
 	''' 
@@ -113,20 +111,21 @@ class SSGA:
 		self.initialize_individuals()
 
 		# computes fitness function for each individual
-		best_indiv = self.evaluate_individuals()
+		best_indiv = self.evaluate_ssga_individuals()
 
 		# renew overall best individual
 		if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 			self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
 			self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 			self.best_indiv['sw_codes'] = best_indiv['sw_codes']
+			self.best_indiv['sw_inv_codes'] = best_indiv['sw_inv_codes']
 
 		# iterate over generations
 		for i in range(self.num_generations):
 			# print("   SSGA generation #" + str(i+1))
 			self.mutation()
 			self.crossover()		
-			best_indiv = self.evaluate_individuals()
+			best_indiv = self.evaluate_ssga_individuals()
 
 			# select best individuals
 			self.ssga_selection()
@@ -136,6 +135,7 @@ class SSGA:
 				self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
 				self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 				self.best_indiv['sw_codes'] = best_indiv['sw_codes']
+				self.best_indiv['sw_inv_codes'] = best_indiv['sw_inv_codes']
 				
 			if self.converge():
 			 	break
@@ -169,12 +169,12 @@ class SSGA:
 	Auxiliar function to get fitness function of an SSGA individual
 	'''
 	def f_indiv_fitness(self, indiv):
-		return indiv.fitness_function
+		return indiv.fitness['FF']
 
 
 	'''
 	Method to generate initial population of SSGA individuals. Each individual has the following parameters:
-	switching_chromosome, fitness_function, list_sw_changes
+	random_keys_list, fitness_function
 	'''
 	def initialize_individuals(self):
 		for i in range(self.num_individuals):
@@ -183,14 +183,9 @@ class SSGA:
 
 			# It resorts of RANDOM KEYS strategy to encode switching sequence.
 			# For each edge to be closed, a random number from [0,1] is appended to
-			# list: "switching_chromosome"
+			# list: "random_keys_list"
 			for j in range(len(self.list_closed_switches)):
-				indiv.switching_chromosome.append(random.random())
-
-			# Alternative way: chromosome of simple SSGA individual refers to both closing and
-			# opening switching operations
-			for j in range(len(self.list_cl_op_sw)):
-				indiv.switching_chromosome_simple.append(random.random())
+				indiv.random_keys_list.append(random.random())
 
 
 	'''
@@ -202,9 +197,9 @@ class SSGA:
 		if num_indiv == 0: return False
 		average_evaluation = 0. ; min_evaluation = 0.
 		for indiv in self.list_ga_individuals:
-			average_evaluation += indiv.fitness_function # sum fitness funct. values
-			if min_evaluation == 0. or indiv.fitness_function < min_evaluation: # updates minimum fitness function
-				min_evaluation = indiv.fitness_function
+			average_evaluation += indiv.fitness['FF'] # sum fitness funct. values
+			if min_evaluation == 0. or indiv.fitness['FF'] < min_evaluation: # updates minimum fitness function
+				min_evaluation = indiv.fitness['FF']
 		average_evaluation /= num_indiv
 
 		# compute difference between minimum and average fitness function (percentage)
@@ -214,133 +209,60 @@ class SSGA:
 
 
 	'''
-	Method to interprete complete switching sequence, based on "SSGA simple technique"
-	'''
-	def complete_switching_sequence_simple_technique(self, ssga_indiv):
-		random_keys: list = ssga_indiv.switching_chromosome_simple   # ex: [0.35, 0.10, 0.55, ...]
-		sw_codes_dicts = list()
-
-		tmp_list: list = random_keys.copy()
-		tmp_list.sort() # ex: [0.10, 0.35, 0.55, ...]
-
-		for value in tmp_list:
-			index = random_keys.index(value)
-			sw_code: list = list(self.list_cl_op_sw[index])
-			sw_code.append(1)
-			if index < len(self.list_closed_switches):
-				sw_dict = {'sw_code': sw_code, 'action': 'cl'}
-			else:
-				sw_dict = {'sw_code': sw_code, 'action': 'op'}
-			sw_codes_dicts.append(sw_dict)
-
-		# Store list of switching operations. Sintax: [{'sw_code':[u,v,w], 'action':'op'}, ...]
-		ssga_indiv.sw_codes_dicts = sw_codes_dicts
-		return sw_codes_dicts
-
-	'''
 	Method to interprete complete switching sequence, based on "SSGA Disturbance Technique"
 	'''
 	def complete_switching_sequence_disturb_technique(self, ssga_indiv):
-		list_pairs = []
 
-		# if only 1 edge to be closed and 0 edges to be opened:
+		# 1 - Initialize list "sw_pairs_cl_op" of SSGA individual's
+		ssga_indiv.sw_pairs_cl_op = []
+
+		# 1 - If only 1 edge to be closed and 0 edges to be opened:
 		if len(self.list_closed_switches) == 1 and len(self.list_opened_switches) == 0:
 			edge_close = list(self.list_closed_switches[0]); edge_close.append(1) # format: [u,v,w=1]
-			list_pairs.append([edge_close, []])
+			ssga_indiv.sw_pairs_cl_op.append([edge_close, []])
+			return
 
-			# Store sequence of switching operations in individual's structure
-			ssga_indiv.sw_seq = list_pairs
-			return list_pairs, None
-
-		random_keys = ssga_indiv.switching_chromosome
+		# 2 - Switching sequence (SS) has to be determined
 		list_edges_close = []  # list of edges to be closed
 		list_edges_open = [] # list of edges to be opened
-		self.random_keys_to_edge(random_keys, list_edges_close)
+		self.random_keys_to_edge(ssga_indiv.random_keys_list, list_edges_close)
 
-		# #debug
-		# linha = ""
-		# for edge_to_close in list_edges_close:
-		# 	linha += str(edge_to_close) + " "
-		# print("Edges to close: " + linha)
+		# 3 - Initialize Graph object to assist the SS simulation
+		graph_simulation = graphModule.Graph(self.graph.V)
+		for edge in self.graph.graph: graph_simulation.graph.append(edge)  # all possible edges
+		for edge in self.initial_edges: u = edge[0];v = edge[1];w = edge[2];graph_simulation.edgesKRST.append([u, v, w]) # initially closed edges
+		for edge_set in self.list_opened_switches: edge = list(edge_set); edge.append(1); list_edges_open.append(edge)
 
-		graph_simulation = graphModule.Graph(self.graph.V) # new graph
-		# inserts all possible edges
-		for edge in self.graph.graph:
-			graph_simulation.graph.append(edge)
-		# inserts all initially closed edges
-		for edge in self.initial_edges:
-			u = edge[0] ; v = edge[1] ; w = edge[2]
-			graph_simulation.edgesKRST.append([u, v, w])
-		for edge_set in self.list_opened_switches:
-			edge = list(edge_set); edge.append(1)
-			list_edges_open.append(edge)
-
-		# disturbance technique: for each closed switch, determines
-		# switch to be opened to restore radiality
-
-		# #debug
-		# possible_edges = ""
-		# initial_edges = ""
-		# for edge in graph_simulation.graph:
-		# 	possible_edges += str(edge) + " "
-		# for edge in graph_simulation.edgesKRST:
-		# 	initial_edges += str(edge) + " "
-		# print("Vertices: " + str(graph_simulation.V) + " Possible: " + possible_edges + " Initial: " + initial_edges)
-
-		# Randomly picks edges to be closed
+		# 4 - Randomly pick edges to be closed. Then, verify if a meshed is formed.
+		# - list_edges_close: list of edges that have to be closed
 		while len(list_edges_close) > 0:
-			edge_index = random.randint(0, len(list_edges_close) - 1)
-			edge_close_set = list_edges_close[edge_index] # format: {u,v} (set)
-			edge_close = list(edge_close_set); edge_close.append(1) # format: [u,v,w=1]
+			edge_index = random.randint(0, len(list_edges_close) - 1)  # randomly pick an edge
+			edge_close_set = list_edges_close[edge_index]  # format: {u,v} (set)
+			edge_close = list(edge_close_set); edge_close.append(1)  # format: [u,v,w=1]
 
-			# if edge does not generate mesh, it is included into graph
-			# and removed from list_edges_close
+			# If closing the switch generates mesh, determine which switch must be opened to undo the mesh
 			if graph_simulation.creates_mesh(edge_close):
 				graph_simulation.edgesKRST.append(edge_close)
-				list_edges_close.remove(edge_close_set)  # removes from list "to be closed"
-				# Opens a given edge to re-establish radiality. Format: [u, v, w]
+				list_edges_close.remove(edge_close_set)  # remove from list of edges "to be closed"
+
+				# Open a given edge to re-establish radiality. Format: [u, v, w]
 				edge_open = graph_simulation.edge_to_open_mesh(list_edges_open)
+				if edge_open is None: return
 
-				if edge_open is None:
-					return None, "   *** PROBLEM: no edge to open"
-
-				edge_open_1 = [edge_open[0], edge_open[1], 1]
-				edge_open_2 = [edge_open[1], edge_open[0], 1]
+				# Determine exactly which edge has to be opened to undo the undesired mesh
+				edge_open_1 = [edge_open[0], edge_open[1], 1]; edge_open_2 = [edge_open[1], edge_open[0], 1]
 				if edge_open_1 in list_edges_open:   edge_open = edge_open_1
 				elif edge_open_2 in list_edges_open: edge_open = edge_open_2
 				else:                                edge_open = None
 				if edge_open is not None:
 					list_edges_open.remove(edge_open)
-					list_pairs.append([edge_close, edge_open])
+					ssga_indiv.sw_pairs_cl_op.append([edge_close, edge_open])
 				else:
-					return None, (str(edge_open) + " not in " + str(list_edges_open))
-			else:
+					return
+			else:  # Closing the switch does not generate mesh
 				graph_simulation.edgesKRST.append(edge_close)
-				list_edges_close.remove(edge_close_set)  # removes from list "to be closed"
-				list_pairs.append([edge_close, []])
-		# #debug
-		# line = ""
-		# for pair in list_pairs:
-		# 	line += str(pair) + " "
-		# print("Pairs: " + line)
-
-		# for edge_closed_set in list_edges_close:
-		# 	if graph_simulation.creates_mesh(edge_closed_set):
-		# 		# determines edge to be opened to restore radiality
-		# 		edge_open_set = graph_simulation.edge_to_open_mesh(self.list_opened_switches)
-		# 		list_pairs.append([edge_closed_set, edge_open_set]) # pair: [sw_cl, sw_op]
-		# 	else:
-		# 		list_pairs.append([edge_closed_set, {}])  # pair: [sw_cl, sw_op]
-      #
-		# linha = ""
-		# for edge_closed in list_edges_close:
-		# 	linha += str(edge_closed) + " "
-		# print("Edges to close: " + linha)
-
-		# Store sequence of switching operations in individual's structure
-		ssga_indiv.sw_seq = list_pairs
-
-		return list_pairs, None
+				list_edges_close.remove(edge_close_set)  # Remove edge from list of edges "to be closed"
+				ssga_indiv.sw_pairs_cl_op.append([edge_close, []])
 
 
 	'''
@@ -348,59 +270,36 @@ class SSGA:
 	'''
 	def assign_individuals_switching_operations(self):
 
-		for ssga_indiv in self.list_ga_individuals:
+		for i in reversed(range(len(self.list_ga_individuals))):
+			ssga_indiv = self.list_ga_individuals[i]
 
 			# 1 - Determine switchings (based on disturbance technique chromosome)
-			# sw_seq has the sintax: [[[u_cl,v_cl,w_cl],[u_op,v_op,w_op], ...]
-			sw_seq, str_details = self.complete_switching_sequence_disturb_technique(ssga_indiv)
-			if sw_seq is None:
-				return 1000.
-
-			# 1 - Determine switchings (based on SSGA simple technique)
-			# sw_codes_dicts has the sintax: [{'sw_code':[u,v,w], 'action':'op'}, ...]
-			self.complete_switching_sequence_simple_technique(ssga_indiv)
+			# "sw_pairs_cl_op" has the sintax: [[[u_cl,v_cl,w_cl],[u_op,v_op,w_op]], ...]
+			self.complete_switching_sequence_disturb_technique(ssga_indiv)
+			if ssga_indiv.sw_pairs_cl_op is None: return 1000.
 
 			# 2 - Determine dictionaries with switch changes (based on disturbance technique)
-			self.compute_switching_changes(ssga_indiv)
+			# Results are stored in: ssga_indiv.dicts_sw_changes and ssga_indiv.dicts_sw_inv_changes
+			# Dicts' format: {'code':sw_code, 'action':'cl'}, {'code':sw_code, 'action':'op'}, ...
+			self.determine_sw_states_changes(ssga_indiv)
 
-			# 2 - Determine dictionaries with switch changes (based on simple SSGA technique)
-			self.compute_switching_changes_simple(ssga_indiv)
-
+			# 3 - If there is some problem with individual's SS
+			if ssga_indiv.sw_dicts_pairs_cl_op is None:
+				self.list_ga_individuals.remove(ssga_indiv)
+				del ssga_indiv
 
 
 	'''
 	Method to compute LF_MI (Load flow merit index), based solely on initial and final states.
 	'''
 	def compute_final_state_load_flow_merit_index(self):
-		# # 1 - Pick one individual (the 1st one, for instante)
-		# ssga_indiv = self.list_ga_individuals[0]
-		#
-		# # 2 - Determine switchings (based on disturbance technique chromosome)
-		# # sw_seq has the sintax: [[[u_cl,v_cl,w_cl],[u_op,v_op,w_op], ...]
-		# sw_seq, str_details = self.complete_switching_sequence_disturb_technique(ssga_indiv)
-		# if sw_seq is None:
-		# 	return 1000.
-		#
-		# # 2 - Determine switchings (based on SSGA simple technique)
-		# # sw_codes_dicts has the sintax: [{'sw_code':[u,v,w], 'action':'op'}, ...]
-		# sw_codes_dicts = self.complete_switching_sequence_simple_technique(ssga_indiv)
-		#
-		# # 3 - Determine dictionaries with switch changes (based on disturbance technique)
-		# dicts_sw_changes = self.compute_switching_changes(ssga_indiv)
-		#
-		# # 3 - Determine dictionaries with switch changes (based on simple SSGA technique)
-		# dicts_sw_changes_simple = self.compute_switching_changes_simple(ssga_indiv)
 
 		# 1 - Pick one SSGA individual
 		ssga_indiv = self.list_ga_individuals[0]
-		dicts_sw_changes_simple = ssga_indiv.dicts_sw_changes_simple
 		dicts_sw_changes = ssga_indiv.dicts_sw_changes
 
 		# 2 - Determine initial states dictionary
 		dict_sw_states = self.determine_sw_initial_states()
-
-		if dicts_sw_changes is None or len(dicts_sw_changes) == 0:
-			a = 0
 
 		# 3 - Effectively assess LF_MI
 		LF_MI = self.sw_assessment.load_flow_merit_index(dict_sw_states, dicts_sw_changes)
@@ -446,66 +345,42 @@ class SSGA:
 
 
 	'''
-	Method to compute fitness function of GA individuals. It is based on simulations
-	aimed to reproduce the effects of the investigated switching steps
+	Method to compute fitness function of SSGA individuals. It is based on simulations that reproduce the
+	effects of the investigated switching steps.
 	'''
-	def evaluate_individuals(self):
-		best_indiv = {'sw': None, 'sw_codes': None, 'fitness': 0.0, 'fitness_components': {}}
+	def evaluate_ssga_individuals(self):
+		best_indiv = {'sw': None, 'sw_codes': None, 'sw_inv_codes': None, 'fitness': 0.0, 'fitness_components': {}}
 
-		# Firstly, assign all necessary switching operations to individuals
+		# 1 - Preparation: assign all necessary switching operations to individuals
 		self.assign_individuals_switching_operations()
 
-		# 1 - Compute load flow merit index, which depends solely on initial and final states.
+		# 2 - Compute load flow merit index, which depends solely on initial and final states.
 		# Then, a unique load flow to assess final state loading is enough.
 		LF_MI = self.compute_final_state_load_flow_merit_index()
 
-		# 2 - Compute number of switching operations merit index
+		# 3 - Compute number of switching operations merit index
 		NS_MI = self.compute_number_of_switchings_merit_index()
 
 		for i in reversed(range(len(self.list_ga_individuals))):
 			ssga_indiv = self.list_ga_individuals[i]
 
-			# Individual's switching sequence
-			# sw_seq = ssga_indiv.sw_seq
-			sw_seq_dicts = ssga_indiv.sw_codes_dicts
+			# 4 - Compute crew displacement merit index
+			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(self.start_switch, ssga_indiv.dicts_sw_inv_changes)
 
-			# In case of problems with sequencing, deletes individual
-			if sw_seq_dicts is None:
-				self.list_ga_individuals.remove(ssga_indiv)
-				del ssga_indiv; continue
-
-			# Determine the codes of switches that need to be closed/opened. Format: list of dictionaries.
-			sw_changes = ssga_indiv.dicts_sw_changes
-			# sw_changes_simple = ssga_indiv.dicts_sw_changes_simple
-
-			# Store switch sequence in ssga individual.
-			ssga_indiv.list_sw_changes.clear()
-			for dict_sw_change in sw_changes:
-				ssga_indiv.list_sw_changes.append(dict_sw_change)
-
-			# # determine initial states of network's switches
-			# dict_sw_states = self.determine_sw_initial_states()
-
-			# 3 - Compute crew displacement
-			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(self.start_switch, sw_changes)
-
-			# 4 - Compute outage duration merit index (power interruption during switching procedure)
+			# 5 - Compute outage duration merit index (power interruption during switching procedure)
 			all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
 			vertice_dicts = self.networks_data.list_vertices_dicts
-			OD_MI = self.sw_assessment.outage_duration_merit_index(sw_changes, list_displ_times, all_available_edges, all_init_closed_edges, vertice_dicts)
+			OD_MI = self.sw_assessment.outage_duration_merit_index(ssga_indiv.dicts_sw_inv_changes, list_displ_times, all_available_edges, all_init_closed_edges, vertice_dicts)
 
-			# compute individual total merit index
-			ssga_indiv.fitness_function, fit_func_components = self.compute_total_merit_index(LF_MI, CD_MI, OD_MI, NS_MI)
-			ssga_indiv.fitness_function_components.update({'LF_MI': round(fit_func_components[0], 5)})
-			ssga_indiv.fitness_function_components.update({'CD_MI': round(fit_func_components[1], 5)})
-			ssga_indiv.fitness_function_components.update({'OD_MI': round(fit_func_components[2], 5)})
-			ssga_indiv.fitness_function_components.update({'NS_MI': round(fit_func_components[3], 5)})
+			# 6 - Compute SSGA individual total merit index
+			self.compute_total_merit_index(ssga_indiv, LF_MI, CD_MI, OD_MI, NS_MI)
 
-			# update best individual
-			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness_function:
-				best_indiv['sw'] = sw_seq_dicts; best_indiv['fitness'] = ssga_indiv.fitness_function
-				best_indiv['fitness_components'] = ssga_indiv.fitness_function_components
-				best_indiv['sw_codes'] = ssga_indiv.list_sw_changes
+			# 6 - Update best SSGA individual
+			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness['FF']:
+				best_indiv['sw'] = ssga_indiv.sw_dicts_pairs_cl_op; best_indiv['fitness'] = ssga_indiv.fitness['FF']
+				best_indiv['fitness_components'] = ssga_indiv.fitness
+				best_indiv['sw_codes'] = ssga_indiv.dicts_sw_changes
+				best_indiv['sw_inv_codes'] = ssga_indiv.dicts_sw_inv_changes
 
 
 		#debug
@@ -517,14 +392,14 @@ class SSGA:
 		for i in range(len(self.list_ga_individuals)):
 			ssga_indiv = self.list_ga_individuals[i]
 			if i < n_max:
-				sum_fitness += ssga_indiv.fitness_function
-				print("     #" + str(i + 1) + " - Fitness: " + str(round(ssga_indiv.fitness_function, 6)) + " - " + str(ssga_indiv.list_sw_changes))
+				sum_fitness += ssga_indiv.fitness['FF']
+				print("     #" + str(i + 1) + " - Fitness: " + str(round(ssga_indiv.fitness['FF'], 6)) + " - " + str(ssga_indiv.dicts_sw_inv_changes))
 			else:
-				print("     #" + str(i+1) + " - Fitness: " + str(round(ssga_indiv.fitness_function, 6)))
+				print("     #" + str(i+1) + " - Fitness: " + str(round(ssga_indiv.fitness['FF'], 6)))
 		avg_fitness = sum_fitness / n_max
-		diff = round(100. * (avg_fitness - self.list_ga_individuals[0].fitness_function) / self.list_ga_individuals[0].fitness_function, 5)
+		diff = round(100. * (avg_fitness - self.list_ga_individuals[0].fitness['FF']) / self.list_ga_individuals[0].fitness['FF'], 5)
 		texto  = "     MEDIA (melhores): " + str(round(avg_fitness, 4))
-		texto += " - MINIMO: " + str(round(self.list_ga_individuals[0].fitness_function, 4))
+		texto += " - MINIMO: " + str(round(self.list_ga_individuals[0].fitness['FF'], 4))
 		texto += " - DIFF(%): " + str(diff)
 		print(texto)
 		print("\n")
@@ -540,25 +415,22 @@ class SSGA:
 		OD_MI: outage duration merit index
 		NS_MI: number of switching operations merit index
 	'''
-	def compute_total_merit_index(self, LF_MI, CD_MI, OD_MI, NS_MI):
-		fit_func_components = []
+	def compute_total_merit_index(self, ssga_indiv, LF_MI, CD_MI, OD_MI, NS_MI):
 
-		# specific weighting coefficients
+		# Specific weighting coefficients
 		k_LF = float(self.merit_index_conf['k_load_flow'].replace(',','.'))
 		k_CD = float(self.merit_index_conf['k_crew_displacement'].replace(',','.'))
 		k_OD = float(self.merit_index_conf['k_outage_duration'].replace(',','.'))
 		k_NS = float(self.merit_index_conf['k_number_switching'].replace(',','.'))
 
-		# append fit_func components
-		fit_func_components.append(k_LF * LF_MI)
-		fit_func_components.append(k_CD * CD_MI)
-		fit_func_components.append(k_OD * OD_MI)
-		fit_func_components.append(k_NS * NS_MI)
-
-		# composition of overall merit index value
+		# Composition of overall merit index value
 		total_mi = k_LF * LF_MI + k_CD * CD_MI + k_OD * OD_MI + k_NS * NS_MI
 
-		return total_mi, fit_func_components
+		ssga_indiv.fitness.update({'FF': round(total_mi, 5)})
+		ssga_indiv.fitness.update({'LF_MI': round(k_LF * LF_MI, 5)})
+		ssga_indiv.fitness.update({'CD_MI': round(k_CD * CD_MI, 5)})
+		ssga_indiv.fitness.update({'OD_MI': round(k_OD * OD_MI, 5)})
+		ssga_indiv.fitness.update({'NS_MI': round(k_NS * NS_MI, 5)})
 
 
 	'''
@@ -578,55 +450,52 @@ class SSGA:
 
 	'''
 	Method to compute switching changes to be assessed
+	Sintax of ssga_indiv.sw_pairs_cl_op: [[[uvw_close], []], [[uvw_close_1], [uvw_open_1]], [[uvw_close_2], [uvw_open_2]], ... ]
 	'''
-	def compute_switching_changes(self, ssga_indiv):
-		dicts_sw_changes = []
-		for pair in ssga_indiv.sw_seq:
+	def determine_sw_states_changes(self, ssga_indiv):
+		# Original sequencing: cl_reconn, (cl, op), (cl, op), ...
+		ssga_indiv.dicts_sw_changes = []
+		for pair in ssga_indiv.sw_pairs_cl_op:
 			if len(pair[0]) > 0:
 				edge_close = pair[0] ; sw_code = self.get_sw_code(edge_close)
-				dicts_sw_changes.append({'code':sw_code, 'action':'cl'})
+				ssga_indiv.dicts_sw_changes.append({'code':sw_code, 'action':'cl'})
 			if len(pair[1]) > 0:
 				# print("pair[1]: " + str(type(pair[1])))
 				edge_open = pair[1] ; sw_code = self.get_sw_code(edge_open)
-				dicts_sw_changes.append({'code':sw_code, 'action':'op'})
-		ssga_indiv.dicts_sw_changes = dicts_sw_changes
-		return dicts_sw_changes
+				ssga_indiv.dicts_sw_changes.append({'code':sw_code, 'action':'op'})
 
-
-	'''
-	Method to compute switching changes to be assessed, considering simple SSGA technique
-	      'sw_codes_dicts' has dictionaries with format: {'sw_code':[u,v,w], 'action':'cl'/'op'}
-	'''
-	def compute_switching_changes_simple(self, ssga_indiv):
-		dicts_sw_changes_simple = []
-		for sw_code_dict in ssga_indiv.sw_codes_dicts:
-			sw_code = self.get_sw_code(sw_code_dict['sw_code'])
-			dicts_sw_changes_simple.append({'code': sw_code, 'action': sw_code_dict['action']})
-		ssga_indiv.dicts_sw_changes_simple = dicts_sw_changes_simple
-		return dicts_sw_changes_simple
+		# Alternative (inverse) sequencing: cl_reconn, (op, cl), (op, cl), ...
+		ssga_indiv.dicts_sw_inv_changes = []
+		for pair in ssga_indiv.sw_pairs_cl_op:
+			if len(pair[0]) > 0 and len(pair[1]) == 0:  # 1st sw to reconnect isolated areas
+				edge_close = pair[0]; sw_code = self.get_sw_code(edge_close)
+				ssga_indiv.dicts_sw_inv_changes.append({'code':sw_code, 'action':'cl'})
+			elif len(pair[0]) > 0 and len(pair[1]) > 0:  # (cl,op) would lead to mesh => invert (cl,op) -> (op,cl)
+				edge_open = pair[1]; sw_code = self.get_sw_code(edge_open)
+				ssga_indiv.dicts_sw_inv_changes.append({'code': sw_code, 'action': 'op'})
+				edge_close = pair[0]; sw_code = self.get_sw_code(edge_close)
+				ssga_indiv.dicts_sw_inv_changes.append({'code': sw_code, 'action': 'cl'})
 
 
 	'''
 	Method to get all switches of the current power network
 	'''
 	def get_all_switches(self):
-		sw_codes = []
-		list_edges = self.networks_data.get_list_edges()
+		sw_codes = [] ; list_edges = self.networks_data.get_list_edges()
 		for edge_dict in list_edges:
 			sw_codes.append(edge_dict['code_sw'])
 		return sw_codes
 
 	'''
-	Get switch code corresponding to a given edge.
-	The edge has the format: [u, v, w]
+	Method to provide switch code corresponding to a given edge. The edge has the format: [u, v, w]
 	'''
 	def get_sw_code(self, edge):
 		if edge is None: return ""
 
-		# Gets edge's vertices 'u' and 'v'
+		# Get edge's vertices 'u' and 'v'
 		u = int(edge[0]) ; v = int(edge[1])
 
-		# Searches for [u,v] in list of network's graph topology
+		# Searche for [u,v] in list of network's graph topology
 		list_edges = self.networks_data.get_list_edges()
 		for edge_dict in list_edges:
 			if edge_dict['vertice_1'] == u and edge_dict['vertice_2'] == v:
@@ -636,16 +505,15 @@ class SSGA:
 		return ""
 
 
-
 	'''
 	Method to execute SSGA MUTATION operator
 	'''
 	def mutation(self):
 		for indiv in self.list_ga_individuals:
-			for i in range(len(indiv.switching_chromosome)):
+			for i in range(len(indiv.random_keys_list)):
 				# randomly decides if the gene suffers mutation
 				if random.random() < self.pm:
-					indiv.switching_chromosome[i] = random.random()
+					indiv.random_keys_list[i] = random.random()
 
 
 	'''
@@ -660,12 +528,12 @@ class SSGA:
 
 			indiv1 = self.list_ga_individuals[pair[0]]
 			indiv2 = self.list_ga_individuals[pair[1]]
-			num_genes = len(indiv1.switching_chromosome)
+			num_genes = len(indiv1.random_keys_list)
 
 			if num_genes == 1: # if one-gene-long chromosome, simply exchange
-				gene_aux = indiv1.switching_chromosome[0]
-				indiv1.switching_chromosome[0] = indiv2.switching_chromosome[0]
-				indiv2.switching_chromosome[0] = gene_aux
+				gene_aux = indiv1.random_keys_list[0]
+				indiv1.random_keys_list[0] = indiv2.random_keys_list[0]
+				indiv2.random_keys_list[0] = gene_aux
 			else:
 				# randomly choose crossover initial position
 				crossover_initial_index = random.randint(1, num_genes)
@@ -673,23 +541,18 @@ class SSGA:
 				child_indiv = self.crossover_child_indiv(indiv1, indiv2, crossover_initial_index)
 				self.list_ga_individuals.append(child_indiv)
 
-			a = 0
-		b = 0
 
 	'''
-	Method to provide child indiv (of class IndivSS) resulting from crossover
-	operation between indiv1 and indiv2. 
+	Method to provide child indiv (of class IndivSS) resulting from crossover operation between indiv1 and indiv2. 
 	crossover_initial_index: position index related to SSGA chromosome where crossover will take place
 	'''
 	def crossover_child_indiv(self, indiv1, indiv2, crossover_initial_index):
 		new_indiv = IndivSS()
-		for i in range(len(indiv1.switching_chromosome)):
+		for i in range(len(indiv1.random_keys_list)):
 			if i < crossover_initial_index:
-				new_indiv.switching_chromosome.append(indiv1.switching_chromosome[i])
-				new_indiv.switching_chromosome_simple.append(indiv1.switching_chromosome_simple[i])
+				new_indiv.random_keys_list.append(indiv1.random_keys_list[i])
 			else:
-				new_indiv.switching_chromosome.append(indiv2.switching_chromosome[i])
-				new_indiv.switching_chromosome_simple.append(indiv2.switching_chromosome_simple[i])
+				new_indiv.random_keys_list.append(indiv2.random_keys_list[i])
 		return new_indiv
 
 
@@ -700,21 +563,21 @@ class SSGA:
 	    - (3) self.list_cl_op_sw: (1)+(2)
 	'''
 	def determine_necessary_switchings(self):		
-		# Get all initial graph vertices
+		# 1 - Get all initial graph vertices
 		set_vertices_ini_graph = set([])
-		for edge in self.initial_edges:
-			set_vertices_ini_graph.add(edge[0]) ; set_vertices_ini_graph.add(edge[1])
-			self.initial_graph_data["edges"].append({edge[0], edge[1]})	# appends edge as sets, to avoid duplicity
+		for edge in self.initial_edges:  # edge format: [u,v,w]
+			set_vertices_ini_graph.add(edge[0]); set_vertices_ini_graph.add(edge[1])
+			self.initial_graph_data["edges"].append({edge[0], edge[1]})	# append edge as set, to avoid duplicity
 		self.initial_graph_data["vertices"] = list(set_vertices_ini_graph)
 
-		# Get all final graph vertices
+		# 2 - Get all final graph vertices
 		set_vertices_final_graph = set([])
-		for edge in self.graph.edgesKRST:
-			set_vertices_final_graph.add(edge[0]) ; set_vertices_final_graph.add(edge[1])	
+		for edge in self.graph.edgesKRST:  # edge format: [u,v,w]
+			set_vertices_final_graph.add(edge[0]); set_vertices_final_graph.add(edge[1])
 			self.final_graph_data["edges"].append({edge[0], edge[1]})		# appends edge as set to avoid duplicity	
 		self.final_graph_data["vertices"] = list(set_vertices_final_graph)
 
-		# Get closed and opened switches
+		# 3 - Get closed and opened switches
 		for edge in self.final_graph_data["edges"]:
 			if edge not in self.initial_graph_data["edges"]:
 				self.list_closed_switches.append(edge)
@@ -722,10 +585,7 @@ class SSGA:
 			if edge not in self.final_graph_data["edges"]:
 				self.list_opened_switches.append(edge)
 
-		# Concatenate lists:
+		# 4 - Concatenate lists:
 		self.list_cl_op_sw = self.list_closed_switches + self.list_opened_switches
 
-		if len(self.list_closed_switches) == 0 and len(self.list_opened_switches) == 0:
-			return False
-
-		return True
+		return not(len(self.list_closed_switches) == 0 and len(self.list_opened_switches) == 0)
