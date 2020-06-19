@@ -34,11 +34,11 @@ class SSGA:
 		self.merit_index_conf = merit_index_conf
 
 		# graph data
-		list_switches = self.networks_data.get_list_switches()
+		self.list_switches = self.networks_data.get_list_switches()
 
 		# fundamental parameters
 		self.sw_assessment : switchingAssessmentModule.AssessSSGAIndiv = sw_assessment
-		self.sw_assessment.update_list_switches(list_switches)
+		self.sw_assessment.update_list_switches(self.list_switches)
 		self.graph = graph
 
 		# local variables
@@ -361,14 +361,19 @@ class SSGA:
 		# 3 - Compute number of switching operations merit index
 		NS_MI = self.compute_number_of_switchings_merit_index()
 
+		effective_dicts_sw_changes = [] # list to store effective sw sequence (considering opening upstreams recloser or circ. breaker)
 		for i in reversed(range(len(self.list_ga_individuals))):
 			ssga_indiv = self.list_ga_individuals[i]
 
 			# 4 - Compute crew displacement merit index
 			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(self.start_switch, ssga_indiv.dicts_sw_inv_changes)
 
-			# 5 - Compute outage duration merit index (power interruption during switching procedure)
+			# Check if it is necessary to include auxiliary operations, such as opening upstreams recloser or circuit breaker
+			effective_dicts_sw_changes.clear()
 			all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
+			self.sw_assessment.check_auxiliary_operations(ssga_indiv.dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, effective_dicts_sw_changes)
+
+			# 5 - Compute outage duration merit index (power interruption during switching procedure)
 			vertice_dicts = self.networks_data.list_vertices_dicts
 			OD_MI = self.sw_assessment.outage_duration_merit_index(ssga_indiv.dicts_sw_inv_changes, list_displ_times, all_available_edges, all_init_closed_edges, vertice_dicts)
 

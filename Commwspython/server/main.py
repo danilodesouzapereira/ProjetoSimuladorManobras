@@ -10,7 +10,7 @@ if __name__ == '__main__':
 	path_arq_parametros = ""
 
 	if len(sys.argv) == 1:
-		path_arq_parametros = "Z:\\SINAPgrid\\plataformasinap\\Tmp\\Bin\\Win64\Dat\\DMS\\DadosSimulacoesManobra\\ParametrosExecucao.txt"
+		path_arq_parametros = "Z:\\SINAPgrid\\plataformasinap\\Tmp\\Bin\\Win64\\Dat\\DMS\\DadosSimulacoesManobra\\Executando\\ParametrosExecucao.txt"
 	elif len(sys.argv) == 2:
 		path_arq_parametros = sys.argv[1]
 

@@ -134,6 +134,122 @@ class AssessSSGAIndiv(object):
 
 
 	'''
+	Method to return the type of a given switch
+	'''
+	def switch_type(self, sw_code):
+		for dict_sw in self.list_switches:
+			if dict_sw['code_sw'] == sw_code:
+				return dict_sw['type_sw']
+		return ""
+
+
+	'''
+	Method to determine auxiliary operations. If switch to be opened is manual, the corresponding upstreams automated
+	switch (circ. breaker or recloser) has to be opened and, then, reclosed.
+		Inputs:
+			- ori_dicts_sw_inv_changes: list of dicts with the format: {'code': 'switch_code', 'action': 'op'}
+			- all_available_edges: list of all available edges
+			- all_init_closed_edges: list of all initially closed edges
+		Output:
+			- lis_ext: list of dicts of switches to be closed or opened, now considering auxiliary operations
+	'''
+	def check_auxiliary_operations(self, ori_dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, lis_ext):
+		closed_edges = all_init_closed_edges.copy()
+		all_edges = all_available_edges.copy()
+
+		# Check the whole switching sequence. Each dict_sw_inv_change
+		# has the following format: {'code': 'switch_code', 'action': 'op'})
+		for i in range(len(ori_dicts_sw_inv_changes)):
+			dict_sw_change = ori_dicts_sw_inv_changes[i]
+
+			# If the switch has to be closed:
+			if dict_sw_change['action'] == 'cl':
+				lis_ext.append(dict_sw_change)  # Fill output list of sw changes
+				for edge_dict in all_edges:  # Update temp list of closed edges
+					if edge_dict['switch'] == dict_sw_change['code']:
+						closed_edges.append(edge_dict); break
+
+			# If the switch has to be opened:
+			elif dict_sw_change['action'] == 'op':
+				type_sw = self.switch_type(dict_sw_change['code'])
+
+				# SW to be opened is automated:
+				if type_sw == "disjuntor" or type_sw == "religadora":
+					lis_ext.append(dict_sw_change)  # Fill output list of sw changes
+					for edge_dict in all_edges:  # Update temp list of closed edges
+						if edge_dict['switch'] == dict_sw_change['code']:
+							closed_edges.remove(edge_dict)
+
+				# SW to be opened is not automated => check if any auxiliary switching operation is necessary
+				else:
+					upstreams_automated_sw = str(self.determine_upstreams_automated_switch(dict_sw_change['code'], closed_edges))
+
+					a = 0
+
+					if upstreams_automated_sw == "":  # switch to be opened was initially isolated ==> aux. sw. op. is unnecessary
+						lis_ext.append(dict_sw_change)
+					else:  # switch to be closed was initially energized ==> aux. switching operation is required
+						lis_ext.append({'code': upstreams_automated_sw, 'action': 'op'})
+						lis_ext.append(dict_sw_change)
+						lis_ext.append({'code': upstreams_automated_sw, 'action': 'cl'})
+
+
+	'''
+	Method to determine if auxiliary switching operation is necessary in order to open manual switch. If necessary,
+	the upstream automated switch code is returned.
+		Inputs:
+			- sw_code: code of the manual switch to be opened
+			- closed_edges: list of edges that are currently closed
+		Output:
+			- code of the automated upstream switch to be opened and closed (auxiliary operation)  
+	'''
+	def determine_upstreams_automated_switch(self, sw_code, closed_edges):
+		tmp_closed_edges = closed_edges.copy()
+		list_energized_edges = list()
+		set_energized_nodes = {0}
+		finish = False
+		while not finish:
+			finish = True
+			for i in reversed(range(len(tmp_closed_edges))):
+				edge = tmp_closed_edges[i]
+				if edge['v1'] in set_energized_nodes or edge['v2'] in set_energized_nodes:
+					set_energized_nodes.add(edge['v1'])
+					set_energized_nodes.add(edge['v2'])
+					list_energized_edges.append(edge)
+					tmp_closed_edges.remove(edge)
+					finish = False
+
+		# Get list index according to the ref. edge's position
+		index_edge = -1
+		for i in range(len(list_energized_edges)):
+			edge = list_energized_edges[i]
+			if edge['switch'] == sw_code: index_edge = i; break
+		if index_edge == -1: return ""
+
+		# Try oo identify upstream protection switch (circuit breaker or recloser)
+		edge_ref = list_energized_edges[index_edge]
+		upstream_automated_sw_code = ""
+		while index_edge > 0:
+			# Identify parent edge, towards subestation (node 0)
+			edge = None
+			for i in range(index_edge-1, -1, -1):
+				edge = list_energized_edges[i]
+				if edge['v1'] == edge_ref['v1'] or edge['v1'] == edge_ref['v2'] or edge['v2'] == edge_ref['v1'] or edge['v2'] == edge_ref['v2']:
+					index_edge = i; break
+				else: edge = None
+			if edge is None: break
+
+			# If it is circ. breaker (disjuntor) or recloser (religadora), then its code is returned
+			edge_ref = edge; edge_ref_code = edge_ref['switch']
+			sw_type : str = str(self.switch_type(edge_ref_code))
+			if sw_type == "disjuntor" or sw_type == "religadora":
+				upstream_automated_sw_code = edge_ref_code
+				break
+		return upstream_automated_sw_code
+
+
+
+	'''
 	Method to compute outage duration merit index (OD_MI), which is based on outage times
 	among switching operations. Parameters:
 		- sw_changes:       list of switching operations, containing: switch code and action (op/cl)
