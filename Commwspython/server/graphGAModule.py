@@ -17,8 +17,9 @@ class Indiv:
 		self.f_evaluation = 0.0
 		self.f_evaluation_components = {}
 		self.list_sw_changes = []
-		self.list_sw_changes_codes = []  # items content: cl_reconn, [cl,op], [cl, op], ...
-		self.list_sw_inv_changes_codes = []  # items content: cl_reconn, [op,cl], [op, cl], ...
+		self.list_sw_changes_codes = []  # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [cl,op], [cl,op], ...
+		self.list_sw_inv_changes_codes = []  # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [cl,op], [cl,op], ...
+		self.list_effective_sw_inv_changes_codes = []  # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [cl,op], [cl,op], ...
 
 
 # ===================================================================================#
@@ -74,7 +75,7 @@ class GraphGA:
 			f_aval = indiv.f_evaluation
 			list_fitness.append(round(f_aval,6))
 			list_fitness_components.append(indiv.f_evaluation_components)
-			list_sw_operations.append(indiv.list_sw_changes_codes)
+			list_sw_operations.append(indiv.list_effective_sw_inv_changes_codes)
 
 		list_fitness.sort()
 
@@ -173,6 +174,7 @@ class GraphGA:
 			indiv.list_sw_changes = ssga.best_indiv['sw']
 			indiv.list_sw_changes_codes = ssga.best_indiv['sw_codes']
 			indiv.list_sw_inv_changes_codes = ssga.best_indiv['sw_inv_codes']
+			indiv.list_effective_sw_inv_changes_codes = ssga.best_indiv['effective_dicts_sw_inv_changes']
 			indiv.f_evaluation_components = ssga.best_indiv['fitness_components']
 									
 			# renew Graphic GA best individual
@@ -228,9 +230,9 @@ class GraphGA:
 	Method to extract results
 	'''
 	def get_results(self):
-		eval_best_indiv = round(self.best_indiv.f_evaluation,6)
+		eval_best_indiv = round(self.best_indiv.f_evaluation, 6)
 		list_sw_changes = self.best_indiv.list_sw_changes_codes
-		dict_results = {'Fitness':eval_best_indiv, 'actions':list_sw_changes}
+		dict_results = {'Fitness': eval_best_indiv, 'actions': list_sw_changes}
 		return dict_results
 
 		
@@ -246,12 +248,13 @@ class GraphGA:
 		number_of_vertices = len(list_of_vertices)
 
 		for i in range(round(1.3 * self.num_individuals)):
-			graph = graphModule.Graph(number_of_vertices) # graph obj
-			for edge in self.lista_arestas:               # inserts all possible edges
+			graph = graphModule.Graph(number_of_vertices)  # graph obj
+			for edge in self.lista_arestas:                # inserts all possible edges
 				graph.addEdge(edge[0], edge[1], edge[2])
-			graph.KruskalRST()                            # generate initial radial graph
+			# graph.KruskalRST()
+			graph.KruskalRST_biased(self.initial_edges)    # generate initial radial graph in a biased way: initial edges are more likely to be picked
 			indiv = Indiv(graph, self.initial_edges)
-			self.list_ga_indiv.append(indiv)              # stores individual in list
+			self.list_ga_indiv.append(indiv)               # stores individual in list
 
 			
 	''' 

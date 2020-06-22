@@ -303,9 +303,57 @@ class Graph:
 	def print_graph(self):
 		# print the contents of result[] to display the built MST 
 		for edge in self.edgesKRST: 
-			print ("%d -- %d" % (edge[0],edge[1])) 
-				
-				
+			print ("%d -- %d" % (edge[0],edge[1]))
+
+
+	'''
+	Variation of original method "KruskalRST". This one considers edges biased, in such a way that initially closed
+	edges are more likely to be picked
+	'''
+	def KruskalRST_biased(self, initial_edges):
+		result = []  # This will store the resultant RST
+		i = 0  # An index variable, used for sorted edges
+		e = 0  # An index variable, used for result[]
+
+		# randomly rearrange the graph
+		random.shuffle(self.graph)
+
+		# arrange graph in such a way that initially closed edges come appear first
+		for ini_edge in initial_edges:
+			index = self.graph.index(ini_edge)
+			item = self.graph.pop(index)
+			self.graph.insert(0, item)
+
+		parent = [];
+		rank = []
+
+		# Create V subsets with single elements
+		for node in range(self.V):
+			parent.append(node)
+			rank.append(0)
+
+		# Number of edges to be taken is equal to V-1
+		while e < self.V - 1:
+
+			# Step 2: Pick the smallest edge and increment
+			# the index for next iteration
+			u, v, w = self.graph[i]
+			i = i + 1
+			x = self.find(parent, u)
+			y = self.find(parent, v)
+
+			# If including this edge does't cause cycle,
+			# include it in result and increment the index
+			# of result for next edge
+			if x != y:
+				e = e + 1
+				result.append([u, v, w])
+				self.union(parent, rank, x, y)
+				self.edgesKRST.append([u, v, w])  # saves spanning tree generated randomly
+
+	# Else discard the edge
+
+
 	''' 
 	The main function to construct RST using Kruskal's algorithm 
 	'''

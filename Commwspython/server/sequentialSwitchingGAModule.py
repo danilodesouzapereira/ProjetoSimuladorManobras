@@ -18,7 +18,7 @@ class IndivSS:
 		self.sw_dicts_pairs_cl_op = []     # Sintax: [{'sw_code':[u,v,w], 'action':'op'}, ...]
 		self.dicts_sw_changes = []         # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [cl,op], [cl,op], ...
 		self.dicts_sw_inv_changes = []     # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [op,cl], [op,cl], ...
-
+		self.effective_dicts_sw_inv_changes = []  # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [op,cl], [op,cl], ...
 
 ''' 
 Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
@@ -60,7 +60,7 @@ class SSGA:
 		self.start_switch = SSGA_settings.get('start_switch').lower()
 
 		# overall best individual
-		self.best_indiv = {'sw': None, 'sw_codes': None, 'sw_inv_codes': None, 'fitness': 0.0, 'fitness_components': {}}
+		self.best_indiv = {'sw': None, 'sw_codes': None, 'sw_inv_codes': None, 'effective_dicts_sw_inv_changes': None, 'fitness': 0.0, 'fitness_components': {}}
 
 
 	'''
@@ -116,9 +116,10 @@ class SSGA:
 		# renew overall best individual
 		if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 			self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
-			self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 			self.best_indiv['sw_codes'] = best_indiv['sw_codes']
 			self.best_indiv['sw_inv_codes'] = best_indiv['sw_inv_codes']
+			self.best_indiv['effective_dicts_sw_inv_changes'] = best_indiv['effective_dicts_sw_inv_changes']
+			self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 
 		# iterate over generations
 		for i in range(self.num_generations):
@@ -133,10 +134,11 @@ class SSGA:
 			# renew overall best individual
 			if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 				self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
-				self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 				self.best_indiv['sw_codes'] = best_indiv['sw_codes']
 				self.best_indiv['sw_inv_codes'] = best_indiv['sw_inv_codes']
-				
+				self.best_indiv['effective_dicts_sw_inv_changes'] = best_indiv['effective_dicts_sw_inv_changes']
+				self.best_indiv['fitness_components'] = best_indiv['fitness_components']
+
 			if self.converge():
 			 	break
 
@@ -349,7 +351,7 @@ class SSGA:
 	effects of the investigated switching steps.
 	'''
 	def evaluate_ssga_individuals(self):
-		best_indiv = {'sw': None, 'sw_codes': None, 'sw_inv_codes': None, 'fitness': 0.0, 'fitness_components': {}}
+		best_indiv = {'sw': None, 'sw_codes': None, 'sw_inv_codes': None, 'effective_dicts_sw_inv_changes': None, 'fitness': 0.0, 'fitness_components': {}}
 
 		# 1 - Preparation: assign all necessary switching operations to individuals
 		self.assign_individuals_switching_operations()
@@ -361,33 +363,33 @@ class SSGA:
 		# 3 - Compute number of switching operations merit index
 		NS_MI = self.compute_number_of_switchings_merit_index()
 
-		effective_dicts_sw_changes = [] # list to store effective sw sequence (considering opening upstreams recloser or circ. breaker)
 		for i in reversed(range(len(self.list_ga_individuals))):
 			ssga_indiv = self.list_ga_individuals[i]
 
 			# 4 - Compute crew displacement merit index
 			CD_MI, list_displ_times = self.sw_assessment.crew_displacement_merit_index(self.start_switch, ssga_indiv.dicts_sw_inv_changes)
 
-			# Check if it is necessary to include auxiliary operations, such as opening upstreams recloser or circuit breaker
-			effective_dicts_sw_changes.clear()
+			# 5 - Check if it is necessary to include auxiliary operations, such as opening upstreams recloser or circuit breaker
+			effective_dicts_sw_inv_changes = list()  # list to store effective sw sequence
 			all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
-			self.sw_assessment.check_auxiliary_operations(ssga_indiv.dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, effective_dicts_sw_changes)
+			self.sw_assessment.check_auxiliary_operations(ssga_indiv.dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, effective_dicts_sw_inv_changes)
+			ssga_indiv.effective_dicts_sw_inv_changes = effective_dicts_sw_inv_changes
 
-			# 5 - Compute outage duration merit index (power interruption during switching procedure)
+			# 6 - Compute outage duration merit index (power interruption during switching procedure)
 			vertice_dicts = self.networks_data.list_vertices_dicts
 			OD_MI = self.sw_assessment.outage_duration_merit_index(ssga_indiv.dicts_sw_inv_changes, list_displ_times, all_available_edges, all_init_closed_edges, vertice_dicts)
 
-			# 6 - Compute SSGA individual total merit index
+			# 7 - Compute SSGA individual total merit index
 			self.compute_total_merit_index(ssga_indiv, LF_MI, CD_MI, OD_MI, NS_MI)
 
-			# 6 - Update best SSGA individual
-			if best_indiv['sw'] is None or best_indiv['fitness'] > ssga_indiv.fitness['FF']:
-				best_indiv['sw'] = ssga_indiv.sw_dicts_pairs_cl_op; best_indiv['fitness'] = ssga_indiv.fitness['FF']
-				best_indiv['fitness_components'] = ssga_indiv.fitness
+			# 8 - Update best SSGA individual
+			if best_indiv['sw'] is None or ssga_indiv.fitness['FF'] < best_indiv['fitness']:
+				best_indiv['sw'] = ssga_indiv.sw_pairs_cl_op
 				best_indiv['sw_codes'] = ssga_indiv.dicts_sw_changes
 				best_indiv['sw_inv_codes'] = ssga_indiv.dicts_sw_inv_changes
-
-
+				best_indiv['effective_dicts_sw_inv_changes'] = ssga_indiv.effective_dicts_sw_inv_changes
+				best_indiv['fitness'] = ssga_indiv.fitness['FF']
+				best_indiv['fitness_components'] = ssga_indiv.fitness
 		#debug
 		print("\n")
 		print("     SSGA evaluation: ")
@@ -398,7 +400,7 @@ class SSGA:
 			ssga_indiv = self.list_ga_individuals[i]
 			if i < n_max:
 				sum_fitness += ssga_indiv.fitness['FF']
-				print("     #" + str(i + 1) + " - Fitness: " + str(round(ssga_indiv.fitness['FF'], 6)) + " - " + str(ssga_indiv.dicts_sw_inv_changes))
+				print("     #" + str(i + 1) + " - Fitness: " + str(round(ssga_indiv.fitness['FF'], 6)) + " - " + str(ssga_indiv.effective_dicts_sw_inv_changes))
 			else:
 				print("     #" + str(i+1) + " - Fitness: " + str(round(ssga_indiv.fitness['FF'], 6)))
 		avg_fitness = sum_fitness / n_max
