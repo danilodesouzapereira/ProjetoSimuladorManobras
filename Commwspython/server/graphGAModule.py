@@ -67,29 +67,19 @@ class GraphGA:
 
 
 	def print_fitness_function(self):
-		# debug - get all fitness functions
-		list_fitness = []
-		list_fitness_components = []
-		list_sw_operations = []
+		tmp_list = list()
+		avg_fitness = 0.0
 		for indiv in self.list_ga_indiv:
-			f_aval = indiv.f_evaluation
-			list_fitness.append(round(f_aval,6))
-			list_fitness_components.append(indiv.f_evaluation_components)
-			list_sw_operations.append(indiv.list_effective_sw_inv_changes_codes)
+			tmp_list.append(indiv)
+			avg_fitness += indiv.f_evaluation
+		avg_fitness /= len(self.list_ga_indiv)
+		tmp_list.sort(key=self.f_eval_ga_obj)
+		best_fitness_indiv: Indiv = tmp_list[0]
+		print("Individuals' fitness functions:")
+		for indiv in tmp_list:
+			print("Fitness: " + str(round(indiv.f_evaluation, 5)) + " (" + str(indiv.f_evaluation_components) + ") " + str(indiv.list_effective_sw_inv_changes_codes))
+		print("Average individual: " + str(round(avg_fitness, 6)) + " Best individual: " + str(round(best_fitness_indiv.f_evaluation)))
 
-		list_fitness.sort()
-
-		best_fitness = list_fitness[0]
-		avg_fitness = np.average(list_fitness)
-
-		print("Fitness functions:")
-		for i in range(len(list_fitness)):
-			fitness = list_fitness[i]
-			fitness_comp = list_fitness_components[i]
-			operations = list_sw_operations[i]
-
-			print("fitness: " + str(round(fitness, 5)) + " (" + str(fitness_comp) + ") " + str(operations))
-		print("Avg: " + str(round(avg_fitness, 6)) + " Best: " + str(round(best_fitness, 6)))
 
 	'''
 	Method to verify if GA individuals have achieved convergence by analyzing
@@ -117,8 +107,8 @@ class GraphGA:
 	'''
 	def run_gga(self):
 		print(" ============== 1st stage - Initial generation ===============")
-		self.generate_individuals()
-		self.run_gga_optimal_switching()
+		self.generate_individuals()  # fill self.list_ga_indiv
+		self.run_gga_optimal_switching()  # evaluate each indiv and update self.best_indiv
 
 		# Print fitness function
 		self.print_fitness_function()
