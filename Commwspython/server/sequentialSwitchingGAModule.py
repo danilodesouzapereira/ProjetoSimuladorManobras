@@ -100,20 +100,31 @@ class SSGA:
 	to obtain a given final graph from an initial graph.
 	'''
 	def run_ssga(self):
-		# Determines opened switches and closed switches. This populates lists:
+		# Determine opened switches and closed switches. This populates lists:
 		#   - (1) self.list_closed_switches: list of switches that need to be closed
 		#   - (2) self.list_opened_switches: list of switches that need to be opened
 		#   - (3) self.list_cl_op_sw: list with (1) + (2)
 		if not self.determine_necessary_switchings():
 			return False
 
-		# generates initial population of SSGA individuals
+		# Generate initial population of SSGA individuals
 		self.initialize_individuals()
 
-		# computes fitness function for each individual
+		# If only one switching operation, GA iterations are unnecessary.
+		if len(self.list_cl_op_sw) == 1:
+			best_indiv = self.evaluate_ssga_individuals()
+			self.best_indiv['sw'] = best_indiv['sw']
+			self.best_indiv['fitness'] = best_indiv['fitness']
+			self.best_indiv['sw_codes'] = best_indiv['sw_codes']
+			self.best_indiv['sw_inv_codes'] = best_indiv['sw_inv_codes']
+			self.best_indiv['effective_dicts_sw_inv_changes'] = best_indiv['effective_dicts_sw_inv_changes']
+			self.best_indiv['fitness_components'] = best_indiv['fitness_components']
+			return True
+
+		# Compute fitness function for each individual
 		best_indiv = self.evaluate_ssga_individuals()
 
-		# renew overall best individual
+		# Renew overall best individual
 		if self.best_indiv['sw'] is None or best_indiv['fitness'] < self.best_indiv['fitness']:
 			self.best_indiv['sw'] = best_indiv['sw'] ; self.best_indiv['fitness'] = best_indiv['fitness']
 			self.best_indiv['sw_codes'] = best_indiv['sw_codes']
@@ -121,7 +132,7 @@ class SSGA:
 			self.best_indiv['effective_dicts_sw_inv_changes'] = best_indiv['effective_dicts_sw_inv_changes']
 			self.best_indiv['fitness_components'] = best_indiv['fitness_components']
 
-		# iterate over generations
+		# Iterate over generations
 		for i in range(self.num_generations):
 			# print("   SSGA generation #" + str(i+1))
 			self.mutation()
