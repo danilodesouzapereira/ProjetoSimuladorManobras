@@ -16,7 +16,11 @@ if __name__ == '__main__':
 
 	file_json_param = open(path_arq_parametros, "r")
 	json_param = json.loads(file_json_param.readlines()[0])
-	dados_simulacao = json_param['dados_simulacao']
-	simulador = simuladorManobras.SM(dados_simulacao)
+
+	dados_diretorios = json_param['dados_diretorios']  # Data related to folders' paths
+	dados_isolacao_defeito = json_param['dados_isolacao_defeito']  # Data related to switches to be opened to isolate the fault
+	dados_simulacao = json_param['dados_simulacao']  # Data related to simulations settings
+
+	simulador = simuladorManobras.SM(dados_diretorios, dados_isolacao_defeito, dados_simulacao)
 	simulador.run_simulator()
 	simulador.return_response()

@@ -11,27 +11,29 @@ Main class: SM (Simulador de Manobras)
 
 
 class SM(object):
-	def __init__(self, dados_simulacao):
+	def __init__(self, dados_diretorios, dados_isolacao_defeito, dados_simulacao):
 
-		# get data provided through the Web Service call
-		self.dados_simulacao = dados_simulacao  # contains data and settings
-		dss_files_folder = self.dados_simulacao['local_dss']  # folder with DSS files
+		# Get data provided through the Web Service call
+		self.dados_simulacao = dados_simulacao  # Dict with settings regarding simulations
+		self.dados_diretorios = dados_diretorios  # Dict with folders paths
+		self.dados_isolacao_defeito = dados_isolacao_defeito  # Dict with switches to be opened necessarily in order to isolate the fault
+		dss_files_folder = self.dados_diretorios['local_dss']  # Folder with DSS files
 		self.sm_folder = dss_files_folder + "\\..\\"
 
 		self.settings_graph_GA = self.get_GGA_settings()      # settings of Graph Genetic Algorithm
 		self.settings_switching_GA = self.get_SSGA_settings() # settings of Seq. Switching Genetic Algorithm
 
-		# get configurations concerning merit index calculation
+		# Get configurations concerning merit index calculation
 		self.merit_index_conf = self.dados_simulacao['av_conf_indice_merito']
 
-		# object with all networks' data
+		# Object with all networks' data
 		self.networks_data = networksData.NetworksData(self.sm_folder)
 		self.networks_data.initialize()
 
-		# results
+		# Results
 		self.dict_results: dict = None
 
-		# object to assess sequential switching through load flow simulations
+		# Object to assess sequential switching through load flow simulations
 		self.sw_assessment = switchingAssessmentModule.AssessSSGAIndiv(dss_files_folder, self.networks_data)
 
 
@@ -45,7 +47,6 @@ class SM(object):
 		settings_graph_GA.update({'num_individuals': int(dict_conf['num_individuos'])})
 		settings_graph_GA.update({'pc': float(dict_conf['pc'].replace(',','.'))})
 		settings_graph_GA.update({'pm': float(dict_conf['pm'].replace(',','.'))})
-		
 		return settings_graph_GA
 
 
@@ -66,7 +67,7 @@ class SM(object):
 
 	''' DEBUG method '''
 	def print_output(self):
-		local_saida = self.dados_simulacao['local_saida'] + "\\ArquivoSaida.txt"
+		local_saida = self.dados_diretorios['local_saida'] + "\\ArquivoSaida.txt"
 		f = open(local_saida, "w+")
 		f.write('Este e o arquivo de saida do processo\n')
 		f.write('Local do defeito: ' + str(self.dados_simulacao['vertice_falta']) + '\n')
@@ -111,6 +112,16 @@ class SM(object):
 
 
 	'''
+	Method to include all initial necessary switches that need to be opened, which are necessary to isolate the faulty area.
+	'''
+	def add_initial_necessary_switchings(self):
+		for i in range(len(self.dados_isolacao_defeito)):
+			codigo_chave = (self.dados_isolacao_defeito['chave' + str(i+1)]).lower()
+			dict_op = {'code': codigo_chave, 'action': 'op'}
+			self.dict_results['actions'].insert(0, dict_op)
+
+
+	'''
 	Main method - execution of Graph GA (1st stage)
 	'''
 	def run_simulator(self):
@@ -118,15 +129,16 @@ class SM(object):
 		gga = graphGAModule.GraphGA(self.sm_folder, self.settings_graph_GA, self.settings_switching_GA,
 		                            self.sw_assessment, self.networks_data, self.merit_index_conf)
 			
-		# Runs GA
+		# Run GA
 		gga.run_gga()
-				
 		print("\nGGA finalizado")
 		
-		# Obtains results
+		# Obtain results
 		self.dict_results = gga.get_results()
+
+		# Insert initial switchings, which are necessary to isolate the fault.
+		self.add_initial_necessary_switchings()
 		
 		print("\nDict de resultados:\n")
 		print(self.dict_results)
-		
 		time.sleep(5)

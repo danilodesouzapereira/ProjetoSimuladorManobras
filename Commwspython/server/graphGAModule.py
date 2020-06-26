@@ -33,16 +33,16 @@ class GraphGA:
 	def __init__(self, sm_folder, settings_graph_ga, settings_switching_ga, sw_assessment, networks_data, merit_index_conf):
 		self.sm_folder = sm_folder
 
-		# configurations concerning merit index calculation
+		# Configurations concerning merit index calculation
 		self.merit_index_conf = merit_index_conf
 
-		# data concerning the power networks investigated
+		# Data concerning the power networks investigated
 		self.networks_data = networks_data
 
-		# object for switching sequencing assessment
+		# Object for switching sequencing assessment
 		self.sw_assessment = sw_assessment
 
-		# graph GA parameter
+		# Graph GA parameter
 		self.num_geracoes = settings_graph_ga.get('num_generations')
 		self.num_individuals = settings_graph_ga.get('num_individuals')
 		self.pc = settings_graph_ga.get('pc')
@@ -107,8 +107,8 @@ class GraphGA:
 	'''
 	def run_gga(self):
 		print(" ============== 1st stage - Initial generation ===============")
-		self.generate_individuals()  # fill self.list_ga_indiv
-		self.run_gga_optimal_switching()  # evaluate each indiv and update self.best_indiv
+		self.generate_individuals()  # Fill self.list_ga_indiv
+		self.run_gga_optimal_switching()  # Evaluate each indiv and update self.best_indiv
 
 		# Print fitness function
 		self.print_fitness_function()
