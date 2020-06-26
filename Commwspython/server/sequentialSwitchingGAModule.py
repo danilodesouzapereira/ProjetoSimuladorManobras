@@ -581,14 +581,14 @@ class SSGA:
 	    - (3) self.list_cl_op_sw: (1)+(2)
 	'''
 	def determine_necessary_switchings(self):		
-		# 1 - Get all initial graph vertices
+		# 1 - Get all initial graph edges and vertices
 		set_vertices_ini_graph = set([])
 		for edge in self.initial_edges:  # edge format: [u,v,w]
 			set_vertices_ini_graph.add(edge[0]); set_vertices_ini_graph.add(edge[1])
 			self.initial_graph_data["edges"].append({edge[0], edge[1]})	# append edge as set, to avoid duplicity
 		self.initial_graph_data["vertices"] = list(set_vertices_ini_graph)
 
-		# 2 - Get all final graph vertices
+		# 2 - Get all final graph edges and vertices
 		set_vertices_final_graph = set([])
 		for edge in self.graph.edgesKRST:  # edge format: [u,v,w]
 			set_vertices_final_graph.add(edge[0]); set_vertices_final_graph.add(edge[1])

@@ -102,6 +102,18 @@ class GraphGA:
 		return diff <= 0.01
 
 
+	'''
+	Method to determine if GA iterations are necessary
+	'''
+	def ga_iterations_necessary(self):
+		max_num_switching_operations = 0
+		for i in reversed(range(len(self.list_ga_indiv))):
+			indiv = self.list_ga_indiv[i]
+			if len(indiv.list_sw_changes) > max_num_switching_operations:
+				max_num_switching_operations = len(indiv.list_sw_changes)
+		return max_num_switching_operations > 1
+
+
 	''' 
 	Main method, which effectively runs GA
 	'''
@@ -112,7 +124,11 @@ class GraphGA:
 
 		# Print fitness function
 		self.print_fitness_function()
-				
+
+		# If all individuals contain only one switching operation, GA iterations are unnecessary
+		if not self.ga_iterations_necessary():
+			return
+
 		# 1st stage GA generations
 		for i in range(self.num_geracoes):
 			print("=== GGA generation #" + str(i+1) + " ===")

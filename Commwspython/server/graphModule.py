@@ -6,6 +6,7 @@
 import random 
 import networkx as nx
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 #Class to represent a graph 
@@ -318,14 +319,15 @@ class Graph:
 		# randomly rearrange the graph
 		random.shuffle(self.graph)
 
-		# arrange graph in such a way that initially closed edges come appear first
+		# arrange graph in such a way that initially closed edges appear first
 		for ini_edge in initial_edges:
+			if np.random.randint(0, 100) > 50:
+				continue
 			index = self.graph.index(ini_edge)
 			item = self.graph.pop(index)
 			self.graph.insert(0, item)
 
-		parent = [];
-		rank = []
+		parent = []; rank = []
 
 		# Create V subsets with single elements
 		for node in range(self.V):
