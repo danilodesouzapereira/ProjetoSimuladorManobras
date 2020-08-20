@@ -4,6 +4,7 @@ import sys
 import gc
 import json
 import time
+from pathlib import Path
 
 dados_simulacao = None	
 if __name__ == '__main__':

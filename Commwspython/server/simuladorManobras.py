@@ -4,6 +4,7 @@ import requests
 import networksData
 import time
 import os.path
+import json
 
 # ===================================================================================#
 '''
@@ -116,24 +117,23 @@ class SM(object):
 	Method to return dictionary with results
 	'''
 	def return_data_to_text_file(self, path_dat_folder, dict_return_data):
-		path_file_log_ss = path_dat_folder + "DMS\\DadosSimulacoesManobra\\Executando\\bancoresultados_sm.txt"
-
-		text: list = None
-		if os.path.exists(path_file_log_ss):
-			f = open(path_file_log_ss, "r")
-			text = f.readlines()
-			f.close()
+		path_out_file = path_dat_folder + "/DMS/DadosSimulacoesManobra/bancoresultados_sm.txt"
+		path_out_file = os.path.normpath(path_out_file)
+		if os.path.isfile(path_out_file):
+			lines = list()
+			with open(path_out_file, "r") as f:
+				for line in f:
+					lines.append(line)
+			string_json_return_data = json.dumps(dict_return_data)
+			lines.insert(0, string_json_return_data + "\n")
+			with open(path_out_file, "w") as f:
+				f.writelines(lines)
 		else:
-			text = list()
-
-		text.insert(0, str(dict_return_data))
-		if len(text) == 100:
-			text.pop()
-				
-		f = open(path_file_log_ss, "w+")
-		f.writelines(text)
-		f.close()
-
+			lines = list()
+			string_json_return_data = json.dumps(dict_return_data)
+			lines.insert(0, string_json_return_data + "\n")
+			with open(path_out_file, "w") as f:
+				f.writelines(lines)
 
 
 	'''

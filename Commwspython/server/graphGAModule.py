@@ -261,7 +261,7 @@ class GraphGA:
 			for edge in self.lista_arestas:                # inserts all possible edges
 				graph.addEdge(edge[0], edge[1], edge[2])
 			# graph.KruskalRST()
-			bias_probability = 95  # integer value within [0,100]
+			bias_probability = 99  # integer value within [0,100]
 			graph.KruskalRST_biased(self.initial_edges, bias_probability)   # generate initial radial graph in a biased way: initial edges are more likely to be picked
 			indiv = Indiv(graph, self.initial_edges)
 			self.list_ga_indiv.append(indiv)               # stores individual in list
