@@ -6,7 +6,7 @@ import numpy as np
 
 # ===================================================================================#
 '''  
-Class to represent Graph GA individual
+Class to represent Graph Genetic Algorithm (GGA) individual
 '''
 
 
@@ -50,8 +50,8 @@ class GraphGA:
 		self.settings_switching_ga = settings_switching_ga
 
 		# Get data concerning networks' graph
-		self.lista_arestas = []
-		self.initial_edges = []
+		self.lista_arestas = []   # list with all operable switches
+		self.initial_edges = []   # list with normally closed switches
 		dicts_edges = networks_data.list_graph_operable_switches_dicts
 		for dict_edge in dicts_edges:
 			self.lista_arestas.append([dict_edge['v1'], dict_edge['v2'], 1])
@@ -63,7 +63,7 @@ class GraphGA:
 		self.list_ga_indiv = []
 		
 		# Reference to Graph-based GA best individual
-		self.best_indiv : Indiv = None
+		self.best_indiv: Indiv = None
 
 
 	def print_fitness_function(self):
@@ -115,7 +115,7 @@ class GraphGA:
 
 
 	''' 
-	Main method, which effectively runs GA
+	Main method, which effectively runs GGA
 	'''
 	def run_gga(self):
 		print(" ============== 1st stage - Initial generation ===============")
@@ -161,13 +161,13 @@ class GraphGA:
 						
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
 			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
-																indiv.initial_edges,
-																self.settings_switching_ga,
-																self.sw_assessment,
-																self.networks_data,
-																self.merit_index_conf)
+																 indiv.initial_edges,
+																 self.settings_switching_ga,
+																 self.sw_assessment,
+																 self.networks_data,
+																 self.merit_index_conf)
 
-			#debug
+			# debug
 			print("     EVALUATING GGA INDIV #" + str(i+1) + ":")
 
 			# run SSGA (Sequential Switching Genetic Algorithm)
@@ -237,7 +237,10 @@ class GraphGA:
 	'''
 	def get_results(self):
 		eval_best_indiv = round(self.best_indiv.f_evaluation, 6)
-		list_sw_changes = self.best_indiv.list_sw_changes_codes
+
+		# list_sw_changes = self.best_indiv.list_sw_changes_codes
+		list_sw_changes = self.best_indiv.list_effective_sw_inv_changes_codes
+
 		dict_results = {'Fitness': eval_best_indiv, 'actions': list_sw_changes}
 		return dict_results
 
@@ -248,7 +251,7 @@ class GraphGA:
 	def generate_individuals(self):
 		# determine number of vertices
 		list_of_vertices = []
-		for edge in self.lista_arestas:
+		for edge in self.lista_arestas:  # list with all operable switches
 			if edge[0] not in list_of_vertices: list_of_vertices.append(edge[0])
 			if edge[1] not in list_of_vertices:	list_of_vertices.append(edge[1])
 		number_of_vertices = len(list_of_vertices)
@@ -258,7 +261,8 @@ class GraphGA:
 			for edge in self.lista_arestas:                # inserts all possible edges
 				graph.addEdge(edge[0], edge[1], edge[2])
 			# graph.KruskalRST()
-			graph.KruskalRST_biased(self.initial_edges)    # generate initial radial graph in a biased way: initial edges are more likely to be picked
+			bias_probability = 95  # integer value within [0,100]
+			graph.KruskalRST_biased(self.initial_edges, bias_probability)   # generate initial radial graph in a biased way: initial edges are more likely to be picked
 			indiv = Indiv(graph, self.initial_edges)
 			self.list_ga_indiv.append(indiv)               # stores individual in list
 

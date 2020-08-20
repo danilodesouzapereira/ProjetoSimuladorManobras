@@ -3,6 +3,7 @@ import switchingAssessmentModule
 import requests
 import networksData
 import time
+import os.path
 
 # ===================================================================================#
 '''
@@ -82,20 +83,67 @@ class SM(object):
 		f.close()
 	
 
-	def return_response(self):
+	'''
+	Method to send response to end-point and persist corresponding content to log file.
+	'''
+	def return_response(self, path_dat, id_sm):
 		list_actions = [] ; acao : str
+		return_data: dict = {}
+		return_data.update({'id': str(id_sm)})
+
 		for dict_action in self.dict_results['actions']:
 			sw_code = dict_action['code'] ; action = dict_action['action']
 			if action == 'cl': acao = 'fechar'
 			else: acao = 'abrir'
-			list_actions.append({'chave':sw_code, 'acao':acao})
-		return_data = {'chaveamentos':list_actions}
+			list_actions.append({'chave': sw_code, 'acao': acao})
+		return_data.update({'chaveamentos': list_actions})
 		
 		print("Fitness: " + str(self.dict_results['Fitness']))
-		
-		#r = requests.post('http://127.0.0.1:5011/retornosimulacao', json=return_data)
-		url_local = 'http://localhost:8082/datasnap/rest/TServerMethods1/SaidaSM/'
-		r = requests.get(url_local + str(return_data))		
+
+		# Produce simple debug
+		self.save_log(return_data, path_dat)
+
+		# Send return data via web service
+		# #r = requests.post('http://127.0.0.1:5011/retornosimulacao', json=return_data)
+		# url_local = 'http://localhost:8082/datasnap/rest/TServerMethods1/SaidaSM/'
+		# r = requests.get(url_local + str(return_data))
+
+		# Produce return through text file
+		self.return_data_to_text_file(path_dat, return_data)
+
+
+	'''
+	Method to return dictionary with results
+	'''
+	def return_data_to_text_file(self, path_dat_folder, dict_return_data):
+		path_file_log_ss = path_dat_folder + "DMS\\DadosSimulacoesManobra\\Executando\\bancoresultados_sm.txt"
+
+		text: list = None
+		if os.path.exists(path_file_log_ss):
+			f = open(path_file_log_ss, "r")
+			text = f.readlines()
+			f.close()
+		else:
+			text = list()
+
+		text.insert(0, str(dict_return_data))
+		if len(text) == 100:
+			text.pop()
+				
+		f = open(path_file_log_ss, "w+")
+		f.writelines(text)
+		f.close()
+
+
+
+	'''
+	Method to persist logs concerning the simulation
+	'''
+	def save_log(self, dict_return_data : dict, path_file_dat):
+		path_file_log_ss = path_file_dat + "DMS\\logs\\log_simulador_manobra.txt"
+		arq = open(path_file_log_ss, "w+")
+		arq.write(str(dict_return_data))
+		arq.close()
 
 
 	# '''

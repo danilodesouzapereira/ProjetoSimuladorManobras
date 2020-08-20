@@ -21,7 +21,7 @@ class IndivSS:
 		self.effective_dicts_sw_inv_changes = []  # Sintax: {'code':sw_code, 'action':'op'}), following cl(reconn), [op,cl], [op,cl], ...
 
 ''' 
-Main class, responsible for determining the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
+Main class, aimed to implement the SSGA (SEQUENTIAL SWITCHING GENETIC ALGORITHM) 
 '''
 
 
@@ -37,7 +37,7 @@ class SSGA:
 		self.list_switches = self.networks_data.get_list_switches()
 
 		# fundamental parameters
-		self.sw_assessment : switchingAssessmentModule.AssessSSGAIndiv = sw_assessment
+		self.sw_assessment: switchingAssessmentModule.AssessSSGAIndiv = sw_assessment
 		self.sw_assessment.update_list_switches(self.list_switches)
 		self.graph = graph
 

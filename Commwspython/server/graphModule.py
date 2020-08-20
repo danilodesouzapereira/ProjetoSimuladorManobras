@@ -9,18 +9,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-#Class to represent a graph 
+'''
+Class to represent a graph 
+'''
+
+
 class Graph: 
-	def __init__(self,vertices): 
-		self.V = vertices #No. of vertices 
-		self.graph = [] # default dictionary to store graph 	
-		self.edgesKRST = [] # stores edges after KruskalRST procedure
+	def __init__(self, vertices):
+		self.V = vertices  # Number of vertices
+		self.graph = []  # Default dictionary to store graph
+		self.edgesKRST = []  # Store edges after KruskalRST procedure
+
 
 	'''
 	Function to add an edge to graph
 	'''
-	def addEdge(self,u,v,w): 
-		self.graph.append([u,v,w])
+	def addEdge(self, u, v, w):
+		self.graph.append([u, v, w])
 
 
 	''' 
@@ -197,10 +202,10 @@ class Graph:
 	Method to determine if current graph topology is radial
 	'''
 	def is_radial(self):
-		parent = [] ; rank = []
-		for node in range(self.V): parent.append(node) ; rank.append(0)
+		parent = []; rank = []
+		for node in range(self.V): parent.append(node); rank.append(0)
 		for edge in self.edgesKRST:
-			x = self.find(parent, edge[0]) ; y = self.find(parent, edge[1])
+			x = self.find(parent, edge[0]); y = self.find(parent, edge[1])
 			self.union(parent, rank, x, y)
 			if x == y: return False
 		return True
@@ -309,9 +314,9 @@ class Graph:
 
 	'''
 	Variation of original method "KruskalRST". This one considers edges biased, in such a way that initially closed
-	edges are more likely to be picked
+	edges are more likely to be picked.
 	'''
-	def KruskalRST_biased(self, initial_edges):
+	def KruskalRST_biased(self, initial_edges, bias_prob):
 		result = []  # This will store the resultant RST
 		i = 0  # An index variable, used for sorted edges
 		e = 0  # An index variable, used for result[]
@@ -321,12 +326,11 @@ class Graph:
 
 		# arrange graph in such a way that initially closed edges appear first
 		for ini_edge in initial_edges:
-			if np.random.randint(0, 100) > 50:
+			if np.random.randint(0, 100) > bias_prob:
 				continue
 			index = self.graph.index(ini_edge)
 			item = self.graph.pop(index)
 			self.graph.insert(0, item)
-
 		parent = []; rank = []
 
 		# Create V subsets with single elements
