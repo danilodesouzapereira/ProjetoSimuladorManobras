@@ -97,7 +97,7 @@ class SM(object):
 
 		for id_task in range(len(self.dict_results['actions'])):
 			dict_action = self.dict_results['actions'][id_task]
-			sw_code = dict_action['code'] ; action = dict_action['action']
+			sw_code = dict_action['code'].upper() ; action = dict_action['action']
 			if action == 'cl':
 				task_type = 'FECHAR'
 				description = 'Fechar a chave ' + sw_code
@@ -115,9 +115,9 @@ class SM(object):
 		# information about the switching sequence
 		list_sw_sequence_plans.append({'RANK': '1', 'CHAVEAMENTOS': list_actions})
 
-		# overall information about the proposed plans of switching sequence
+		# detailed information about the proposed plans of switching sequence
 		return_data: dict = {}
-		return_data.update({'ID': str(id_sm), 'PLANOS': list_sw_sequence_plans})
+		return_data.update({'ID': str(id_sm), 'DETAILS': list_sw_sequence_plans})
 
 		print("Fitness: " + str(self.dict_results['Fitness']))
 
