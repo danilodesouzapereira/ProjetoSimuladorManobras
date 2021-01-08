@@ -144,8 +144,8 @@ class AssessSSGAIndiv(object):
 
 
 	'''
-	Method to determine auxiliary operations. If switch to be opened is manual, the corresponding upstreams automated
-	switch (circ. breaker or recloser) has to be opened and, then, reclosed.
+	Method to determine auxiliary switching operations. If switch to be opened is manual, the corresponding upstreams 
+	automated switch (circ. breaker or recloser) has to be opened and, then, reclosed.
 		Inputs:
 			- ori_dicts_sw_inv_changes: list of dicts with the format: {'code': 'switch_code', 'action': 'op'}
 			- all_available_edges: list of all available edges
@@ -153,7 +153,7 @@ class AssessSSGAIndiv(object):
 		Output:
 			- lis_ext: list of dicts of switches to be closed or opened, now considering auxiliary operations
 	'''
-	def check_auxiliary_operations(self, ori_dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, lis_ext):
+	def determine_auxiliary_sw_operations(self, ori_dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, lis_ext):
 		closed_edges = all_init_closed_edges.copy()
 		all_edges = all_available_edges.copy()
 
@@ -183,8 +183,6 @@ class AssessSSGAIndiv(object):
 				# SW to be opened is not automated => check if any auxiliary switching operation is necessary
 				else:
 					upstreams_automated_sw = str(self.determine_upstreams_automated_switch(dict_sw_change['code'], closed_edges))
-
-					a = 0
 
 					if upstreams_automated_sw == "":  # switch to be opened was initially isolated ==> aux. sw. op. is unnecessary
 						lis_ext.append(dict_sw_change)

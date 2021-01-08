@@ -27,7 +27,7 @@ class SM(object):
 
 		# Get configurations concerning merit index calculation
 		self.merit_index_conf = self.dados_simulacao['av_conf_indice_merito']
-
+		
 		# Object with all networks' data
 		self.networks_data = networksData.NetworksData(self.sm_folder)
 		self.networks_data.initialize()
@@ -57,6 +57,7 @@ class SM(object):
 	'''
 	def get_SSGA_settings(self):
 		settings_graph_GA = {}
+		settings_graph_GA.update({'aux_switching': (self.dados_simulacao['chav_auxiliar'].upper() == "TRUE")})
 		dict_conf = self.dados_simulacao['conf_ag_chv_otimo']
 		settings_graph_GA.update({'num_generations': int(dict_conf['num_geracoes'])})
 		settings_graph_GA.update({'num_individuals': int(dict_conf['num_individuos'])})
@@ -117,7 +118,10 @@ class SM(object):
 
 		# detailed information about the proposed plans of switching sequence
 		return_data: dict = {}
-		return_data.update({'ID': str(id_sm), 'DETAILS': list_sw_sequence_plans})
+		return_data.update({'ID': str(id_sm)})
+		return_data.update({'STATUS': 'OK'})
+		return_data.update({'COMMENT': '0'})
+		return_data.update({'DETAILS': list_sw_sequence_plans})
 
 		print("Fitness: " + str(self.dict_results['Fitness']))
 
@@ -196,17 +200,17 @@ class SM(object):
 		# Initialize graph GA object
 		gga = graphGAModule.GraphGA(self.sm_folder, self.settings_graph_GA, self.settings_switching_GA,
 		                            self.sw_assessment, self.networks_data, self.merit_index_conf)
-			
+
 		# Run GA
 		gga.run_gga()
 		print("\nGGA finalizado")
-		
+
 		# Obtain results
 		self.dict_results = gga.get_results()
 
 		# Insert initial switchings, which are necessary to isolate the fault.
 		self.add_initial_necessary_switchings()
-		
+
 		print("\nDict de resultados:\n")
 		print(self.dict_results)
 		time.sleep(5)

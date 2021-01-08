@@ -3,6 +3,7 @@ import random
 import itertools
 import graphModule
 import switchingAssessmentModule
+import time
 
 
 ''' 
@@ -52,6 +53,7 @@ class SSGA:
 
 		# Sw. Sequencing GA settings
 		self.SSGA_settings = SSGA_settings
+		self.auxiliary_switching = SSGA_settings.get('aux_switching')  # look for auxiliary switching (True or False)
 		self.num_generations = SSGA_settings.get('num_generations')
 		self.num_individuals = SSGA_settings.get('num_individuals')
 		self.pc = SSGA_settings.get('pc')
@@ -382,8 +384,15 @@ class SSGA:
 
 			# 5 - Check if it is necessary to include auxiliary operations, such as opening upstreams recloser or circuit breaker
 			effective_dicts_sw_inv_changes = list()  # list to store effective sw sequence
-			all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
-			self.sw_assessment.check_auxiliary_operations(ssga_indiv.dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, effective_dicts_sw_inv_changes)
+			if self.auxiliary_switching:  # option to consider auxiliary switching operations
+				print(" \n ------- Considering aux switching")
+				all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
+				self.sw_assessment.determine_auxiliary_sw_operations(ssga_indiv.dicts_sw_inv_changes, all_available_edges, all_init_closed_edges, effective_dicts_sw_inv_changes)
+			else:  # option to not consider auxiliary switching operations
+				print(" \n ------- Disconsidering aux switching")
+				all_available_edges, all_init_closed_edges = self.networks_data.all_edges()
+				self.keep_init_switchings(ssga_indiv.dicts_sw_inv_changes, effective_dicts_sw_inv_changes)
+
 			ssga_indiv.effective_dicts_sw_inv_changes = effective_dicts_sw_inv_changes
 
 			# 6 - Compute outage duration merit index (power interruption during switching procedure)
@@ -423,6 +432,16 @@ class SSGA:
 		print("\n")
 
 		return best_indiv
+
+
+	'''
+	Method to repeat original dicts into lis_ext
+	'''
+	def keep_init_switchings(self, ori_dicts_sw_inv_changes, lis_ext):
+		# Each dict_sw_inv_change has the following format: {'code': 'switch_code', 'action': 'op'}
+		for i in range(len(ori_dicts_sw_inv_changes)):
+			dict_sw_change = ori_dicts_sw_inv_changes[i]
+			lis_ext.append(dict_sw_change)  # Fill output list of sw changes
 
 
 	'''
