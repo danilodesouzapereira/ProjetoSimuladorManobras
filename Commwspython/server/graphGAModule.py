@@ -2,6 +2,7 @@ import graphModule
 import itertools
 import sequentialSwitchingGAModule
 import numpy as np
+import time
 
 
 # ===================================================================================#
@@ -118,6 +119,7 @@ class GraphGA:
 	Main method, which effectively runs GGA
 	'''
 	def run_gga(self):
+
 		print(" ============== 1st stage - Initial generation ===============")
 		self.generate_individuals()  # Fill self.list_ga_indiv
 		self.run_gga_optimal_switching()  # Evaluate each indiv and update self.best_indiv
@@ -150,7 +152,6 @@ class GraphGA:
 	'''
 	def run_gga_optimal_switching(self):
 		print("\n================ 2nd stage - SSGA =======================")
-				
 		# LIST OF GGA INDIVIDUALS:
 		for i in reversed(range(len(self.list_ga_indiv))):
 		
@@ -158,7 +159,7 @@ class GraphGA:
 		
 			# print("\n=== SSGA for G_ini => G_" + str(i+1) + " ====")			
 			indiv = self.list_ga_indiv[i]
-						
+
 			# print("   Final graph: " + str(indiv.graph.edgesKRST) + "\n")
 			ssga = sequentialSwitchingGAModule.SSGA(indiv.graph,
 																 indiv.initial_edges,

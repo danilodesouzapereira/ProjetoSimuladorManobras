@@ -395,6 +395,7 @@ class SSGA:
 
 			ssga_indiv.effective_dicts_sw_inv_changes = effective_dicts_sw_inv_changes
 
+
 			# 6 - Compute outage duration merit index (power interruption during switching procedure)
 			vertice_dicts = self.networks_data.list_vertices_dicts
 			OD_MI = self.sw_assessment.outage_duration_merit_index(ssga_indiv.dicts_sw_inv_changes, list_displ_times, all_available_edges, all_init_closed_edges, vertice_dicts)

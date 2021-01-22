@@ -9,14 +9,21 @@ from pathlib import Path
 dados_simulacao = None	
 if __name__ == '__main__':
 	path_arq_parametros = ""
-
+	id_plano = -1
 	if len(sys.argv) == 1:
 		path_arq_parametros = "Z:\\SINAPgrid\\plataformasinap\\Tmp\\Bin\\Win64\\Dat\\DMS\\DadosSimulacoesManobra\\Executando\\ParametrosExecucao.txt"
 		path_dat = "Z:\\SINAPgrid\\plataformasinap\\Tmp\\Bin\\Win64\\Dat\\"
+		id_plano = 1
 	elif len(sys.argv) == 2:
 		path_arq_parametros = sys.argv[1]
 		pos_dat: int = path_arq_parametros.lower().find("dat")
 		path_dat = path_arq_parametros[:pos_dat+4]
+		id_plano = 1
+	elif len(sys.argv) == 3:
+		path_arq_parametros = sys.argv[1]
+		pos_dat: int = path_arq_parametros.lower().find("dat")
+		path_dat = path_arq_parametros[:pos_dat+4]
+		id_plano = int(sys.argv[2])
 
 	print("Dados passados por parametro: " + str(len(sys.argv)))
 
@@ -30,4 +37,4 @@ if __name__ == '__main__':
 
 	simulador = simuladorManobras.SM(dados_diretorios, dados_isolacao_defeito, dados_simulacao)
 	simulador.run_simulator()
-	simulador.return_response(path_dat, id_sm)
+	simulador.return_response(path_dat, id_sm, id_plano)

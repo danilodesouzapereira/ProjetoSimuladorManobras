@@ -37,7 +37,7 @@ class SM(object):
 
 		# Object to assess sequential switching through load flow simulations
 		self.sw_assessment = switchingAssessmentModule.AssessSSGAIndiv(dss_files_folder, self.networks_data)
-
+		
 
 	'''
 	Method to update dictionary with GGA settings
@@ -88,13 +88,13 @@ class SM(object):
 	'''
 	Method to send response to end-point and persist corresponding content to log file.
 	'''
-	def return_response(self, path_dat, id_sm):
+	def return_response(self, path_dat, id_sm, id_plano):
 		acao : str
 		list_actions = []
 
-		# list_sw_sequence_plans: list with switching sequence plans
+		# list_sw_sequence_details: list with switching sequence plans
 		# each plan comprises a list of switching actions
-		list_sw_sequence_plans = []
+		#list_sw_sequence_details = []
 
 		for id_task in range(len(self.dict_results['actions'])):
 			dict_action = self.dict_results['actions'][id_task]
@@ -114,14 +114,16 @@ class SM(object):
 			list_actions.append({'TASK': str(id_task+1), 'TYPE': task_type, 'DEVICE': sw_code, 'DESCRIPTION': description, 'DEVICE_TYPE': device_type, 'PHASES': phases_info, 'GROUPING': task_grouping})
 
 		# information about the switching sequence
-		list_sw_sequence_plans.append({'RANK': '1', 'CHAVEAMENTOS': list_actions})
+		sw_seq_details : dict = {'RANK': '1', 'CHAVEAMENTOS': list_actions}
+		#list_sw_sequence_details.append({'RANK': '1', 'CHAVEAMENTOS': list_actions})
 
 		# detailed information about the proposed plans of switching sequence
 		return_data: dict = {}
 		return_data.update({'ID': str(id_sm)})
+		return_data.update({'ID_PLANO': str(id_plano)})
 		return_data.update({'STATUS': 'OK'})
 		return_data.update({'COMMENT': '0'})
-		return_data.update({'DETAILS': list_sw_sequence_plans})
+		return_data.update({'DETAILS': sw_seq_details})
 
 		print("Fitness: " + str(self.dict_results['Fitness']))
 
@@ -187,10 +189,23 @@ class SM(object):
 	Method to include all initial necessary switches that need to be opened, which are necessary to isolate the faulty area.
 	'''
 	def add_initial_necessary_switchings(self):
+		# Switches downstreams the area to be isolated
 		for i in range(len(self.dados_isolacao_defeito)):
 			codigo_chave = (self.dados_isolacao_defeito['chave' + str(i+1)]).lower()
 			dict_op = {'code': codigo_chave, 'action': 'op'}
 			self.dict_results['actions'].insert(0, dict_op)
+
+		# Check if it is necessary to include switch immediately upstreams pontothe area to be isolated
+		codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
+		dict_res = None
+		for i in range(len(self.dict_results['actions'])):
+			dict_res = self.dict_results['actions'][i]
+			if dict_res['code'] == codigo_chave:
+				break
+			dict_res = None
+		if dict_res is None:
+			dict_res = {'code': codigo_chave, 'action': 'op'}
+			self.dict_results['actions'].insert(0, dict_res)
 
 
 	'''
