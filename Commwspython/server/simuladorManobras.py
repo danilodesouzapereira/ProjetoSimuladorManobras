@@ -258,4 +258,4 @@ class SM(object):
 
 		print("\nDict de resultados:\n")
 		print(self.dict_results)
-		time.sleep(5)
+		time.sleep(1)
