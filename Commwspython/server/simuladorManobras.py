@@ -3,6 +3,7 @@ import switchingAssessmentModule
 import requests
 import networksData
 import time
+import datetime
 import os.path
 import json
 
@@ -111,16 +112,16 @@ class SM(object):
 				device_type = 'CHAVE'
 				phases_info = 'ABC'
 				task_grouping = 'ISOLACAO'
-			list_actions.append({'TASK': str(id_task+1), 'TYPE': task_type, 'DEVICE': sw_code, 'DESCRIPTION': description, 'DEVICE_TYPE': device_type, 'PHASES': phases_info, 'GROUPING': task_grouping})
+			list_actions.append({'TASK': id_task+1, 'TYPE': task_type, 'DEVICE': sw_code, 'DESCRIPTION': description, 'DEVICE_TYPE': device_type, 'PHASES': phases_info, 'GROUPING': task_grouping})
 
 		# information about the switching sequence
-		sw_seq_details : dict = {'RANK': '1', 'CHAVEAMENTOS': list_actions}
+		sw_seq_details : dict = {'RANK': 1, 'CHAVEAMENTOS': list_actions}
 		#list_sw_sequence_details.append({'RANK': '1', 'CHAVEAMENTOS': list_actions})
 
 		# detailed information about the proposed plans of switching sequence
 		return_data: dict = {}
-		return_data.update({'ID': str(id_sm)})
-		return_data.update({'ID_PLANO': str(id_plano)})
+		return_data.update({'ID': id_sm})
+		return_data.update({'ID_PLANO': id_plano})
 		return_data.update({'STATUS': 'OK'})
 		return_data.update({'COMMENT': '0'})
 		return_data.update({'DETAILS': sw_seq_details})
@@ -137,6 +138,15 @@ class SM(object):
 
 		# Produce return through text file
 		self.return_data_to_text_file(path_dat, return_data)
+
+
+	'''
+	Method to provide a formatted datetime regarding the simulation_end
+	'''
+	def time_now(self):
+		now = datetime.datetime.now()
+		formatted_datetime = now.strftime("%d/%m/%Y %H:%M")
+		return formatted_datetime
 
 
 	'''
@@ -195,17 +205,37 @@ class SM(object):
 			dict_op = {'code': codigo_chave, 'action': 'op'}
 			self.dict_results['actions'].insert(0, dict_op)
 
-		# Check if it is necessary to include switch immediately upstreams pontothe area to be isolated
+		# Check if it is necessary to include switch immediately upstreams the area to be isolated
 		codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
+
+		# If upstream sw is circuit breaker or recloser, it is not necessary to be opened
+		sw_records = self.networks_data.get_list_switches()
+		open_upstream_sw = False
+		for sw in sw_records:
+			if sw['code_sw'].lower() != codigo_chave_montante.lower(): continue
+			if sw['type_sw'] == 'disjuntor' or sw['type_sw'] == 'religadora':
+				open_upstream_sw = False
+			else:
+				open_upstream_sw = True
+			break
+		if not open_upstream_sw:
+			return
+
+		# Reach out for upstream sw in task list
 		dict_res = None
 		for i in range(len(self.dict_results['actions'])):
 			dict_res = self.dict_results['actions'][i]
-			if dict_res['code'] == codigo_chave:
+			if dict_res['code'].lower() == codigo_chave_montante.lower():
 				break
 			dict_res = None
-		if dict_res is None:
-			dict_res = {'code': codigo_chave, 'action': 'op'}
-			self.dict_results['actions'].insert(0, dict_res)
+
+		if dict_res: # if already exists, remove and insert at i=0
+			self.dict_results['actions'].remove(dict_res)
+			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op'}
+			self.dict_results['actions'].insert(0, dict_res_novo)
+		else:  # if does not exist, remove and insert at i=0
+			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op'}
+			self.dict_results['actions'].insert(0, dict_res_novo)
 
 
 	'''

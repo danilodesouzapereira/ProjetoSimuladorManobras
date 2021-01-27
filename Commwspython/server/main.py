@@ -30,7 +30,7 @@ if __name__ == '__main__':
 	file_json_param = open(path_arq_parametros, "r")
 	json_param = json.loads(file_json_param.readlines()[0])
 
-	id_sm = json_param['id']  # Integer number to identify Switching Simulation request
+	id_sm = int(json_param['id'])  # Integer number to identify Switching Simulation request
 	dados_diretorios = json_param['dados_diretorios']  # Data related to folders' paths
 	dados_isolacao_defeito = json_param['dados_isolacao_defeito']  # Data related to switches to be opened to isolate the fault
 	dados_simulacao = json_param['dados_simulacao']  # Data related to simulations settings
