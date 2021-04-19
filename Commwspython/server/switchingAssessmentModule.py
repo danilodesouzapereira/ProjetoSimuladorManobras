@@ -11,7 +11,6 @@ class AssessSSGAIndiv(object):
 	def __init__(self, path_folder, networks_data):
 		self.networks_data : networksData.NetworksData = networks_data
 		self.feeders_info = networks_data.feeder_protections()
-
 		self.dss = dss.DSS(path_folder) # DSS object for load flow simulations
 		self.dss.initialize(self.feeders_info)
 		self.list_switches = None
