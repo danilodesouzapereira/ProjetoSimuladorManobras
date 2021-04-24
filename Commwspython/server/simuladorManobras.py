@@ -238,6 +238,10 @@ class SM(object):
 		index: int = num_actions-1
 		while index >= 0:
 			dict_action = self.dict_results['actions'][index]
+			# skip isolation tasks
+			if dict_action['grouping'] == 'isolacao':
+				index = index - 1
+				continue
 			mirr_dict_action = None
 			if dict_action['action'] == 'op':
 				mirr_dict_action = {'code': dict_action['code'], 'action': 'cl', 'grouping': 'retorno'}
@@ -305,11 +309,15 @@ class SM(object):
 
 		if dict_res: # if already exists, remove and insert at i=0
 			self.dict_results['actions'].remove(dict_res)
-			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(0, dict_res_novo)
+			dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(0, dict_res_novo_op)
+			dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(1, dict_res_novo_cl)
 		else:  # if does not exist, insert at i=0
-			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(0, dict_res_novo)
+			dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(0, dict_res_novo_op)
+			dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(1, dict_res_novo_cl)
 
 
 	'''
@@ -349,19 +357,20 @@ class SM(object):
 				if dict_res['code'].lower() == codigo_chave_montante.lower():
 					break
 				dict_res = None
-			if dict_res:  # if already exists, remove and insert at i=0
+			if dict_res:  # if already exists, remove and append
 				self.dict_results['actions'].remove(dict_res)
-				dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-				self.dict_results['actions'].append(dict_res_novo)
-			else:  # if does not exist, remove and insert at i=0
-				dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-				self.dict_results['actions'].append(dict_res_novo)
+			# append isolation tasks (op and cl immediately upstream switch)
+			dict_res_novo_abre = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+			self.dict_results['actions'].append(dict_res_novo_abre)
+			dict_res_novo_fecha = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+			self.dict_results['actions'].append(dict_res_novo_fecha)
 		else:
-			# 1.3 If meshed operations are NOT allowed, de-energize reference blocks BEFORE connecting neighboring feeder
+			# 1.3 If meshed operations are NOT allowed, de-energize reference blocks BEFORE connecting
+			# neighboring feeder
 			for i in range(len(self.dados_isolacao_defeito)):  # Switches downstreams the area to be isolated
 				codigo_chave = (self.dados_isolacao_defeito['chave' + str(i + 1)]).lower()
-				dict_op = {'code': codigo_chave, 'action': 'op', 'grouping': 'isolacao'}
-				self.dict_results['actions'].insert(0, dict_op)
+				dict_isol = {'code': codigo_chave, 'action': 'op', 'grouping': 'remanejamento'}
+				self.dict_results['actions'].insert(0, dict_isol)
 			# 1.4 Check if immediately upstream switch is already in the task list
 			codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
 			dict_res = None
@@ -372,11 +381,11 @@ class SM(object):
 				dict_res = None
 			if dict_res:  # if already exists, remove and insert at i=0
 				self.dict_results['actions'].remove(dict_res)
-				dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-				self.dict_results['actions'].insert(0, dict_res_novo)
-			else:  # if does not exist, remove and insert at i=0
-				dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-				self.dict_results['actions'].insert(0, dict_res_novo)
+			# insert isolation tasks (op and cl upstream sw) at i=0 and i=1, respectively
+			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(0, dict_res_novo)
+			dict_res_novo_fecha = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(1, dict_res_novo_fecha)
 
 
 	'''
