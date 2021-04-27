@@ -324,8 +324,8 @@ class SM(object):
 	def check_if_meshed_allowed(self):
 		# Check switches to be closed
 		for dict_action in self.dict_results['actions']:
-			if dict_action['action'] == 'cl':
-				# dict format: {'code': codigo_chave_montante, 'action': 'op'}
+			if dict_action['action'] == 'cl' and dict_action['grouping'] == 'remanejamento':
+				# dict format: {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'remanejamento'}
 				code_sw: str = dict_action['code']
 				if code_sw.lower() in self.lista_chaves_excecoes:
 					return False
@@ -379,6 +379,7 @@ class SM(object):
 				dict_res = None
 			if dict_res:  # if already exists, remove and insert at i=0
 				self.dict_results['actions'].remove(dict_res)
+
 			# insert isolation tasks (op and cl upstream sw) at i=0 and i=1, respectively
 			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
 			self.dict_results['actions'].insert(0, dict_res_novo)
