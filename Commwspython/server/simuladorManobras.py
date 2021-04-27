@@ -286,20 +286,21 @@ class SM(object):
 
 		# 2. Check if it is necessary to include switch immediately upstreams the area to be isolated.
 		# If upstream sw is circuit breaker or recloser, it is not necessary to be opened.
-		codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
-		sw_records = self.networks_data.get_list_switches()
-		open_upstream_sw = False
-		for sw in sw_records:
-			if sw['code_sw'].lower() != codigo_chave_montante.lower(): continue
-			if sw['type_sw'] == 'disjuntor' or sw['type_sw'] == 'religadora':
-				open_upstream_sw = False
-			else:
-				open_upstream_sw = True
-			break
-		if not open_upstream_sw:
-			return
+		# codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
+		# sw_records = self.networks_data.get_list_switches()
+		# open_upstream_sw = False
+		# for sw in sw_records:
+		# 	if sw['code_sw'].lower() != codigo_chave_montante.lower(): continue
+		# 	if sw['type_sw'] == 'disjuntor' or sw['type_sw'] == 'religadora':
+		# 		open_upstream_sw = False
+		# 	else:
+		# 		open_upstream_sw = True
+		# 	break
+		# if not open_upstream_sw:
+		# 	return
 
 		# 3. Check if upstream sw is already in the task list.
+		codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
 		dict_res = None
 		for i in range(len(self.dict_results['actions'])):
 			dict_res = self.dict_results['actions'][i]
@@ -307,17 +308,14 @@ class SM(object):
 				break
 			dict_res = None
 
-		if dict_res: # if already exists, remove and insert at i=0
+		if dict_res: # if already exists, remove
 			self.dict_results['actions'].remove(dict_res)
-			dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(0, dict_res_novo_op)
-			dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(1, dict_res_novo_cl)
-		else:  # if does not exist, insert at i=0
-			dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(0, dict_res_novo_op)
-			dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(1, dict_res_novo_cl)
+
+		# insert at i=0
+		dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+		self.dict_results['actions'].insert(0, dict_res_novo_op)
+		dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+		self.dict_results['actions'].insert(1, dict_res_novo_cl)
 
 
 	'''
