@@ -13,9 +13,9 @@ if __name__ == '__main__':
 	id_plano = -1
 	self_healing = 0    # 0: no, 1: yes
 	if len(sys.argv) == 1:
-		path_arq_parametros = "C:\\Sinapsis\\SINAPgrid\\Dat\\DMS\\DadosSimulacoesManobra\\Executando\\ParametrosExecucao.txt"
-		path_chv_sem_manobra_anel = "C:\\Sinapsis\\SINAPgrid\\Dat\\DMS\\DadosSimulacoesManobra\\Executando\\ChavesSemManobraAnel.txt"
-		path_dat = "C:\\Sinapsis\\SINAPgrid\\Dat\\"
+		path_arq_parametros = "Z:\\SINAPgrid\\PlataformaSinap\\Tmp\\Bin\\Win64\\Dat\\DMS\\DadosSimulacoesManobra\\Executando\\ParametrosExecucao.txt"
+		path_chv_sem_manobra_anel = "Z:\\SINAPgrid\\PlataformaSinap\\Tmp\\Bin\\Win64\\Dat\\DMS\\DadosSimulacoesManobra\\Executando\\ChavesSemManobraAnel.txt"
+		path_dat = "Z:\\SINAPgrid\\PlataformaSinap\\Tmp\\Bin\\Win64\\Dat\\"
 		id_plano = 1
 		self_healing = 0  # 0: no, 1: yes
 	elif len(sys.argv) == 2:
@@ -51,6 +51,6 @@ if __name__ == '__main__':
 	dados_isolacao_defeito = json_param['dados_isolacao_defeito']  # Data related to switches to be opened to isolate the fault
 	dados_simulacao = json_param['dados_simulacao']  # Data related to simulations settings
 
-	simulador = simuladorManobras.SM(dados_diretorios, dados_isolacao_defeito,dados_simulacao, path_chv_sem_manobra_anel)
+	simulador = simuladorManobras.SM(dados_diretorios, dados_isolacao_defeito, dados_simulacao, path_chv_sem_manobra_anel)
 	simulador.run_simulator(self_healing)
 	simulador.return_response(path_dat, id_sm, id_plano, self_healing)

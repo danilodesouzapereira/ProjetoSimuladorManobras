@@ -64,7 +64,7 @@ class SM(object):
 		settings_graph_GA.update({'pc': float(dict_conf['pc'].replace(',','.'))})
 		settings_graph_GA.update({'pm': float(dict_conf['pm'].replace(',','.'))})
 		settings_graph_GA.update({'min_porc_fitness': float(dict_conf['min_porc_fitness'].replace(',','.'))})
-		settings_graph_GA.update({'start_switch': self.dados_simulacao['chave_partida']})
+		settings_graph_GA.update({'start_switch': self.dados_simulacao['lis_chave_partida'][0]['chave_partida']})
 		return settings_graph_GA
 
 
@@ -218,20 +218,41 @@ class SM(object):
 			if self.dados_simulacao['tipo_simulacao'].lower() == 'e':
 				# isolate and then reconnect sound equipment
 				self.compose_final_sw_operations_emergency_simulation()
+				# mirror emerging actions
+				self.mirror_sw_operations_emerg()
 			else:
 				# if meshed allowed, reconnect downstream blocks and then isolate reference area
 				self.compose_final_sw_operations_scheduled_simulation()
+				# mirror scheduled actions
+				self.mirror_sw_operations_scheduled()
 		elif self_healing == 1:
 			self.compose_final_sw_operations_sh()
 
-		# mirror actions of isolation and reconnection
-		self.mirror_sw_operations()
+
+	'''
+	Method to mirror emerging sw operations
+	'''
+	def mirror_sw_operations_emerg(self):
+		if len(self.dict_results['actions']) == 0:
+			return
+		num_actions = len(self.dict_results['actions'])
+		index: int = num_actions-1
+		while index >= 0:
+			dict_action = self.dict_results['actions'][index]
+			mirr_dict_action = None
+			if dict_action['action'] == 'op':
+				mirr_dict_action = {'code': dict_action['code'], 'action': 'cl', 'grouping': 'retorno'}
+			elif dict_action['action'] == 'cl':
+				mirr_dict_action = {'code': dict_action['code'], 'action': 'op', 'grouping': 'retorno'}
+			if mirr_dict_action is not None:
+				self.dict_results['actions'].append(mirr_dict_action)
+			index = index - 1
 
 
 	'''
 	Method to mirror isolation and reconnection sw operations
 	'''
-	def mirror_sw_operations(self):
+	def mirror_sw_operations_scheduled(self):
 		if len(self.dict_results['actions']) == 0:
 			return
 		num_actions = len(self.dict_results['actions'])
@@ -299,23 +320,33 @@ class SM(object):
 		# if not open_upstream_sw:
 		# 	return
 
-		# 3. Check if upstream sw is already in the task list.
-		codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
-		dict_res = None
-		for i in range(len(self.dict_results['actions'])):
-			dict_res = self.dict_results['actions'][i]
-			if dict_res['code'].lower() == codigo_chave_montante.lower():
-				break
-			dict_res = None
-
-		if dict_res: # if already exists, remove
-			self.dict_results['actions'].remove(dict_res)
+		# 3. Check if upstream switches are already in the task list.
+		# codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
+		lis_chaves_montante = self.dados_simulacao['lis_chave_partida']
+		for chv_mont in lis_chaves_montante:
+			for i in range(len(self.dict_results['actions'])):
+				dict_res = self.dict_results['actions'][i]
+				if dict_res['code'].lower() == chv_mont['chave_partida'].lower():
+					self.dict_results['actions'].remove(dict_res)
+					break
+		# dict_res = None
+		# for i in range(len(self.dict_results['actions'])):
+		# 	dict_res = self.dict_results['actions'][i]
+		# 	if dict_res['code'].lower() == codigo_chave_montante.lower():
+		# 		break
+		# 	dict_res = None
+		#
+		# if dict_res: # if already exists, remove
+		# 	self.dict_results['actions'].remove(dict_res)
 
 		# insert at i=0
-		dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-		self.dict_results['actions'].insert(0, dict_res_novo_op)
-		dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
-		self.dict_results['actions'].insert(1, dict_res_novo_cl)
+		for chv_mont in lis_chaves_montante:
+			dict_res_novo_op = {'code': chv_mont['chave_partida'], 'action': 'op', 'grouping': 'isolacao'}
+			self.dict_results['actions'].insert(0, dict_res_novo_op)
+		# dict_res_novo_op = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+		# self.dict_results['actions'].insert(0, dict_res_novo_op)
+		# dict_res_novo_cl = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+		# self.dict_results['actions'].insert(1, dict_res_novo_cl)
 
 
 	'''
@@ -347,21 +378,34 @@ class SM(object):
 				dict_op = {'code': codigo_chave, 'action': 'op', 'grouping': 'remanejamento'}
 				self.dict_results['actions'].append(dict_op)
 
-			# 1.2 Check if immediately upstream switch is already in the task list
-			codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
-			dict_res = None
-			for i in range(len(self.dict_results['actions'])):
-				dict_res = self.dict_results['actions'][i]
-				if dict_res['code'].lower() == codigo_chave_montante.lower():
-					break
-				dict_res = None
-			if dict_res:  # if already exists, remove and append
-				self.dict_results['actions'].remove(dict_res)
+			# 1.2 Check if immediately upstream switches are already in the task list
+			# codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
+			lis_chaves_montante = self.dados_simulacao['lis_chave_partida']
+			for chv_mont in lis_chaves_montante:
+				for i in range(len(self.dict_results['actions'])):
+					dict_res = self.dict_results['actions'][i]
+					if dict_res['code'].lower() == chv_mont['chave_partida'].lower():
+						self.dict_results['actions'].remove(dict_res)
+						break
+			# dict_res = None
+			# for i in range(len(self.dict_results['actions'])):
+			# 	dict_res = self.dict_results['actions'][i]
+			# 	if dict_res['code'].lower() == codigo_chave_montante.lower():
+			# 		break
+			# 	dict_res = None
+			# if dict_res:  # if already exists, remove and append
+			# 	self.dict_results['actions'].remove(dict_res)
+
 			# append isolation tasks (op and cl immediately upstream switch)
-			dict_res_novo_abre = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-			self.dict_results['actions'].append(dict_res_novo_abre)
-			dict_res_novo_fecha = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
-			self.dict_results['actions'].append(dict_res_novo_fecha)
+			for chv_mont in lis_chaves_montante:
+				dict_res_novo_abre = {'code': chv_mont['chave_partida'], 'action': 'op', 'grouping': 'isolacao'}
+				self.dict_results['actions'].append(dict_res_novo_abre)
+				dict_res_novo_fecha = {'code': chv_mont['chave_partida'], 'action': 'cl', 'grouping': 'isolacao'}
+				self.dict_results['actions'].append(dict_res_novo_fecha)
+			# dict_res_novo_abre = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+			# self.dict_results['actions'].append(dict_res_novo_abre)
+			# dict_res_novo_fecha = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+			# self.dict_results['actions'].append(dict_res_novo_fecha)
 		else:
 			# 1.3 If meshed operations are NOT allowed, de-energize reference blocks BEFORE connecting
 			# neighboring feeder
@@ -370,21 +414,33 @@ class SM(object):
 				dict_isol = {'code': codigo_chave, 'action': 'op', 'grouping': 'remanejamento'}
 				self.dict_results['actions'].insert(0, dict_isol)
 			# 1.4 Check if immediately upstream switch is already in the task list
-			codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
-			dict_res = None
-			for i in range(len(self.dict_results['actions'])):
-				dict_res = self.dict_results['actions'][i]
-				if dict_res['code'].lower() == codigo_chave_montante.lower():
-					break
-				dict_res = None
-			if dict_res:  # if already exists, remove and insert at i=0
-				self.dict_results['actions'].remove(dict_res)
+			# codigo_chave_montante = self.dados_simulacao['chave_partida'].lower()
+			lis_chaves_montante = self.dados_simulacao['lis_chave_partida']
+			for chv_mont in lis_chaves_montante:
+				for i in range(len(self.dict_results['actions'])):
+					dict_res = self.dict_results['actions'][i]
+					if dict_res['code'].lower() == chv_mont['chave_partida'].lower():
+						self.dict_results['actions'].remove(dict_res)
+						break
+			# dict_res = None
+			# for i in range(len(self.dict_results['actions'])):
+			# 	dict_res = self.dict_results['actions'][i]
+			# 	if dict_res['code'].lower() == codigo_chave_montante.lower():
+			# 		break
+			# 	dict_res = None
+			# if dict_res:  # if already exists, remove and insert at i=0
+			# 	self.dict_results['actions'].remove(dict_res)
 
 			# insert isolation tasks (op and cl upstream sw) at i=0 and i=1, respectively
-			dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(0, dict_res_novo)
-			dict_res_novo_fecha = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
-			self.dict_results['actions'].insert(1, dict_res_novo_fecha)
+			for chv_mont in lis_chaves_montante:
+				dict_res_novo = {'code': chv_mont['chave_partida'], 'action': 'op', 'grouping': 'isolacao'}
+				self.dict_results['actions'].insert(0, dict_res_novo)
+				dict_res_novo_fecha = {'code': chv_mont['chave_partida'], 'action': 'cl', 'grouping': 'isolacao'}
+				self.dict_results['actions'].insert(1, dict_res_novo_fecha)
+			# dict_res_novo = {'code': codigo_chave_montante, 'action': 'op', 'grouping': 'isolacao'}
+			# self.dict_results['actions'].insert(0, dict_res_novo)
+			# dict_res_novo_fecha = {'code': codigo_chave_montante, 'action': 'cl', 'grouping': 'isolacao'}
+			# self.dict_results['actions'].insert(1, dict_res_novo_fecha)
 
 
 	'''
