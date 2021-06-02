@@ -110,10 +110,12 @@ class SM(object):
 			device_type = 'CHAVE'; phases_info = 'ABC'
 			if action == 'cl':
 				task_type = 'FECHAR'
-				description = 'Fechar a chave ' + sw_code
+				# description = 'Fechar a chave ' + sw_code
+				description = 'FECHAR'
 			else:
 				task_type = 'ABRIR'
-				description = 'Abrir a chave ' + sw_code
+				# description = 'Abrir a chave ' + sw_code
+				description = 'ABRIR'
 			list_actions.append({'TASK': id_task+1, 'TYPE': task_type, 'DEVICE': sw_code, 'DESCRIPTION': description, 'DEVICE_TYPE': device_type, 'PHASES': phases_info, 'GROUPING': task_grouping})
 
 		# information about the switching sequence
